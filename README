@@ -1,0 +1,25 @@
+
+About
+-----
+
+This project provides the implementation of a number of algorithms for computing
+Suffix Arrays over sequences of symbols of arbitrary size (not only strings).
+
+Rationale
+---------
+
+Suffix arrays are an extremely powerful data structure, useful in many areas of
+computer science. The theoretical bounds for computing suffix arrays is, just as with
+suffix trees, O(n). Their practical implementation is in many cases much faster because
+of data access locality.
+
+This project was started because not many suffix arrays algorithms have been ported
+from the C (pointers, pointers) world and out of shear curiosity to see which algorithm
+will perform best.
+
+Developers (Eclipse)
+--------------------
+
+You'll need to install JDT weaving support from:
+http://download.eclipse.org/tools/ajdt/34/dev/update
+
