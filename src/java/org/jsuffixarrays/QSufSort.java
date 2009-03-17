@@ -42,7 +42,7 @@ public class QSufSort implements ISuffixArrayBuilder {
      * <code>false</false>.
      */
     public QSufSort() {
-        this.preserveInput = false;
+        this.preserveInput = true;
     }
 
     /**

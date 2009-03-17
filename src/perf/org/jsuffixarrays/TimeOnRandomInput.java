@@ -1,46 +1,55 @@
 package org.jsuffixarrays;
 
-import static org.apache.commons.lang.SystemUtils.*;
+import static org.apache.commons.lang.SystemUtils.JAVA_VM_INFO;
+import static org.apache.commons.lang.SystemUtils.JAVA_VM_NAME;
+import static org.apache.commons.lang.SystemUtils.JAVA_VM_VENDOR;
+import static org.apache.commons.lang.SystemUtils.JAVA_VM_VERSION;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
-import org.kohsuke.args4j.*;
+import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Measure time taken to build a suffix array on random, but increasing input.
  */
-public class TimeOnRandomInput
-{
-	private final Logger logger = LoggerFactory.getLogger(TimeOnRandomInput.class); 
+public class TimeOnRandomInput {
+    private final Logger logger = LoggerFactory
+            .getLogger(TimeOnRandomInput.class);
 
-    @Option(aliases = {"--random-seed"}, metaVar = "seed", name = "-rnd", required = false, usage = "Random seed")
+    @Option(aliases = { "--random-seed" }, metaVar = "seed", name = "-rnd", required = false, usage = "Random seed")
     public int randomSeed = 0x11223344;
 
-    @Option(aliases = {"--start-size"}, metaVar = "int", name = "-s", required = false, usage = "start from input size")
+    @Option(aliases = { "--start-size" }, metaVar = "int", name = "-s", required = false, usage = "start from input size")
     public int startSize = 100000;
 
-    @Option(aliases = {"--increment"}, metaVar = "int", name = "-i", required = false, usage = "Input size increment")
+    @Option(aliases = { "--increment" }, metaVar = "int", name = "-i", required = false, usage = "Input size increment")
     public int increment = 100000;
 
-    @Option(aliases = {"--rounds"}, metaVar = "int", name = "-r", required = false, usage = "Number of rounds")
+    @Option(aliases = { "--rounds" }, metaVar = "int", name = "-r", required = false, usage = "Number of rounds")
     public int rounds = 100;
 
-    @Option(aliases = {"--warmup-rounds"}, metaVar = "int", name = "-w", required = false, usage = "Warmup rounds")
+    @Option(aliases = { "--warmup-rounds" }, metaVar = "int", name = "-w", required = false, usage = "Warmup rounds")
     public int warmup = 10;
-    
-    @Option(aliases = {"--extra-cells"}, metaVar = "int", name = "-e", required = false, usage = "Extra allocated input cells")
+
+    @Option(aliases = { "--extra-cells" }, metaVar = "int", name = "-e", required = false, usage = "Extra allocated input cells")
     public int extraCells = 3;
 
-    @Option(aliases = {"--alphabet-size"}, metaVar = "int", name = "-a", required = false, usage = "Alphabet size (>= 1)")
+    @Option(aliases = { "--alphabet-size" }, metaVar = "int", name = "-a", required = false, usage = "Alphabet size (>= 1)")
     public int alphabetSize = 100;
-    
-    @Option(aliases = {"--output-file"}, metaVar = "file", name = "-o", required = false, usage = "Output file (if not given, stdout is used)")
+
+    @Option(aliases = { "--output-file" }, metaVar = "file", name = "-o", required = false, usage = "Output file (if not given, stdout is used)")
     public File output;
 
     @Argument(index = 0, required = true, usage = "Algorithm to test.")
@@ -49,8 +58,7 @@ public class TimeOnRandomInput
     /*
      * Run the performance test.
      */
-    private void run() throws IOException
-    {
+    private void run() throws IOException {
         Tools.assertAlways(alphabetSize >= 1, "alphabet size must be >= 1");
         Tools.assertAlways(startSize > 0, "start must be > 0");
         Tools.assertAlways(increment >= 0, "increment must be >= 0");
@@ -60,10 +68,9 @@ public class TimeOnRandomInput
         final MinMax alphabet = new MinMax(1, alphabetSize);
 
         PrintStream out = System.out;
-        if (output != null)
-        {
-            final String charset =
-                Charset.isSupported("UTF8") ? "UTF8" : Charset.defaultCharset().name();
+        if (output != null) {
+            final String charset = Charset.isSupported("UTF8") ? "UTF8"
+                    : Charset.defaultCharset().name();
 
             out = new PrintStream(new FileOutputStream(output), true, charset);
         }
@@ -77,7 +84,7 @@ public class TimeOnRandomInput
         final Runtime rt = Runtime.getRuntime();
 
         logger.info("Algorithm: " + algorithm + ", alphabet: " + alphabetSize
-            + ", extraCells: " + extraCells + ", seed: " + randomSeed);
+                + ", extraCells: " + extraCells + ", seed: " + randomSeed);
 
         logger.info("JVM name: " + JAVA_VM_NAME);
         logger.info("JVM version: " + JAVA_VM_VERSION);
@@ -86,18 +93,12 @@ public class TimeOnRandomInput
         logger.info("JVM max memory: " + rt.maxMemory());
 
         logger.info("Allocating random input: " + maxSize + " bytes.");
-        final int [] input = SuffixArrayBuilderTestBase.generateRandom(
-                rnd, maxSize + extraCells, alphabet);
+        final int[] input = SuffixArrayBuilderTestBase.generateRandom(rnd,
+                maxSize + extraCells, alphabet);
 
-        out.println(
-            String.format(Locale.US, 
-                "%4s "
-              + "%7s "
-              + "%7s "
-              + "%7s "
-              + "%5s  "
-              + "%s",
-              "rnd", "size", "time", "mem(MB)", "av.lcp", "status"));
+        out.println(String.format(Locale.US, "%4s " + "%7s " + "%7s " + "%7s "
+                + "%5s  " + "%s", "rnd", "size", "time", "mem(MB)", "av.lcp",
+                "status"));
 
         /*
          * Run the test. Warmup rounds have negative round numbers. 
@@ -105,8 +106,7 @@ public class TimeOnRandomInput
         logger.info("Running the test.");
         final ISuffixArrayBuilder builder = algorithm.getInstance();
         int size = startSize;
-        for (int round = -warmup; round < rounds; round++)
-        {
+        for (int round = -warmup; round < rounds; round++) {
             MemoryLogger.reset();
 
             // Run the test.
@@ -114,45 +114,31 @@ public class TimeOnRandomInput
             final long endTime;
             String status = "ok";
             double averageLCP = 0;
-            try
-            {
-                final int [] sa = builder.buildSuffixArray(input, 0, size);
-                final int [] lcp = SuffixArrays.computeLCP(input, 0, size, sa);
+            try {
+                final int[] sa = builder.buildSuffixArray(input, 0, size);
+                final int[] lcp = SuffixArrays.computeLCP(input, 0, size, sa);
                 long prefixesLen = 0;
-                for (int i = 0; i < size; i++) prefixesLen += lcp[i];
+                for (int i = 0; i < size; i++)
+                    prefixesLen += lcp[i];
                 averageLCP = prefixesLen / (double) size;
-            }
-            catch (OutOfMemoryError t)
-            {
+            } catch (OutOfMemoryError t) {
                 status = "oom";
-            }
-            catch (Throwable t)
-            {
+            } catch (Throwable t) {
                 status = "err";
-            }
-            finally 
-            {
+            } finally {
                 endTime = System.currentTimeMillis();
             }
 
-            // round, input size, suffix building time, mem used (MB), avg.lcp, status 
-            final String result = String.format(Locale.US, 
-                  "%4d "
-                + "%7d "
-                + "%7.3f "
-                + "%7.3f "
-                + "%5.2f  "
-                + "%s",
-                round,
-                size,
-                (endTime - startTime) / 1000.0d,
-                MemoryLogger.getMemoryUsed() / (double) (1024 * 1024),
-                averageLCP,
-                status);
+            // round, input size, suffix building time, mem used (MB), avg.lcp,
+            // status
+            final String result = String.format(Locale.US, "%4d " + "%7d "
+                    + "%7.3f " + "%7.3f " + "%5.2f  " + "%s", round, size,
+                    (endTime - startTime) / 1000.0d, MemoryLogger
+                            .getMemoryUsed()
+                            / (double) (1024 * 1024), averageLCP, status);
             out.println(result);
 
-            if (round >= 0)
-            {
+            if (round >= 0) {
                 size += increment;
             }
         }
@@ -164,18 +150,14 @@ public class TimeOnRandomInput
     /*
      * Console entry point.
      */
-    public static void main(String [] args) throws Exception
-    {
+    public static void main(String[] args) throws Exception {
         final TimeOnRandomInput launcher = new TimeOnRandomInput();
         final CmdLineParser parser = new CmdLineParser(launcher);
         parser.setUsageWidth(80);
 
-        try
-        {
+        try {
             parser.parseArgument(args);
-        }
-        catch (CmdLineException e)
-        {
+        } catch (CmdLineException e) {
             PrintStream ps = System.out;
             ps.print("Usage: ");
             parser.printSingleLineUsage(ps);
