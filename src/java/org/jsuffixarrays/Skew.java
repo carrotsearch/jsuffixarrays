@@ -18,7 +18,7 @@ import java.util.Arrays;
  * The implementation of this algorithm makes some assumptions about the input. See
  * {@link #buildSuffixArray(int[], int, int)} for details.
  */
-public final class KarkkainenSanders implements ISuffixArrayBuilder
+public final class Skew implements ISuffixArrayBuilder
 {
     /**
      * Lexicographic order for pairs.
@@ -174,7 +174,7 @@ public final class KarkkainenSanders implements ISuffixArrayBuilder
      * <pre>
      * return new {@link NonNegativeCompactingDecorator}(
      *      new {@link ExtraCellsZeroIndexDecorator}(
-     *          new {@link KarkkainenSanders}(), 3));
+     *          new {@link Skew}(), 3));
      * </pre>
      *
      * @see ExtraCellsZeroIndexDecorator

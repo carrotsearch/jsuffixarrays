@@ -20,7 +20,7 @@ import static org.jsuffixarrays.Tools.assertAlways;
  * The implementation of this algorithm makes some assumptions about the input.
  * See {@link #buildSuffixArray(int[], int, int)} for details.
  */
-public final class Mori implements ISuffixArrayBuilder {
+public final class DivSufSort implements ISuffixArrayBuilder {
     /*
      * 
      */
@@ -142,7 +142,7 @@ public final class Mori implements ISuffixArrayBuilder {
     /**
      * {@inheritDoc}
      * <p>
-     * Additional constraints enforced by Mori algorithm:
+     * Additional constraints enforced by DivSufSort algorithm:
      * <ul>
      * <li>non-negative (&ge;0) symbols in the input</li>
      * <li>symbols limited by {@link #ALPHABET_SIZE} (&lt;

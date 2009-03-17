@@ -10,7 +10,7 @@ public class SAISTest extends SuffixArrayBuilderTestBase {
     @Before
     public void setupForConstraints() {
         smallAlphabet = new MinMax(1, 10);
-        largeAlphabet = new MinMax(1, Mori.ALPHABET_SIZE - 1);
+        largeAlphabet = new MinMax(1, 1000);
     }
 
     /*
@@ -26,8 +26,7 @@ public class SAISTest extends SuffixArrayBuilderTestBase {
      */
     @Override
     @Ignore
-    public void sameResultWithArraySlice()
-    {
+    public void sameResultWithArraySlice() {
         // Ignore this test, requires start == 0
     }
 }

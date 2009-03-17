@@ -131,7 +131,7 @@
 			<classpath location="lib/ant-contrib-1.0b3.jar" />
 		</taskdef>
 
-		<property name="algorithms" value="NS_2 KS MORI SAIS QSUFSORT" />
+		<property name="algorithms" value="NS_2 SKEW DIVSUFSORT SAIS QSUFSORT" />
 
 		<delete dir="${perf.logs}" failonerror="false" />
 		<mkdir dir="${perf.logs}" />

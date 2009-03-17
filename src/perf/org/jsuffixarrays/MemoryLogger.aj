@@ -108,12 +108,12 @@ abstract aspect MemoryLogger issingleton()
 }
 
 /**
- * Track memory in {@link KarkainnenSanders} algorithm.
+ * Track memory in {@link Skew} algorithm.
  */
-aspect KarkainnenSandersMemLogger extends MemoryLogger
+aspect SkewMemLogger extends MemoryLogger
 {
     @Override
-    pointcut tracedClasses() : within(KarkkainenSanders);
+    pointcut tracedClasses() : within(Skew);
     @Override
     pointcut excludedMethods(): execution(* leq*(..));
 }
@@ -130,15 +130,27 @@ aspect NaiveSort2MemLogger extends MemoryLogger
 }
 
 /**
- * Track memory in {@link Mori} algorithm.
+ * Track memory in {@link DivSufSort} algorithm.
  */
-aspect MoriMemLogger extends MemoryLogger
+aspect DivSufSortMemLogger extends MemoryLogger
 {
     /* 3 methods using stack are excluded, because they use max. 64 * 4 bytes of extra memory for stack */
     //TODO: somehow exclude TRBudget class
-    //within(Mori && !Mori.TRBudget) doesnt work);
+    //within(DivSufSort && !DivSufSort.TRBudget) doesnt work);
     @Override
-    pointcut tracedClasses() : within(Mori);
+    pointcut tracedClasses(): within(DivSufSort);
     @Override
     pointcut excludedMethods(): execution(private * *(..)) ;
 }
+
+/**
+ * Track memory in {@link NaiveSort2} algorithm.
+ */
+aspect QSUfSortMemLogger extends MemoryLogger
+{
+    @Override
+    pointcut tracedClasses() : within(QSufSort);
+    @Override
+    pointcut excludedMethods(): execution(private * *(..));
+}
+

@@ -7,16 +7,16 @@ package org.jsuffixarrays;
  */
 public enum Algorithm {
     /** Karkkainen-Sanders. */
-    KS("Kärkkäinen-Sanders"),
+    SKEW("Kärkkäinen-Sanders"),
 
     /** Karkkainen-Sanders, with decorators allowing arbitrary input. */
-    KS_D("Kärkkäinen-Sanders (decorated for arbitrary input symbols)"),
+    SKEW_D("Kärkkäinen-Sanders (decorated for arbitrary input symbols)"),
 
     /** Naive sort (quicksort on primitive arrays). */
     NS_2("Naive sort using primitive arrays"),
 
     /** Yuta Mori's divsufsort algorithm. */
-    MORI("Mori's algorithm"),
+    DIVSUFSORT("Mori's algorithm"),
 
     /** Yuta Mori's implementation of SA-IS. */
     SAIS("SA-IS algorithm"),
@@ -39,18 +39,18 @@ public enum Algorithm {
      */
     public ISuffixArrayBuilder getInstance() {
         switch (this) {
-        case KS:
-            return new KarkkainenSanders();
+        case SKEW:
+            return new Skew();
 
-        case KS_D:
+        case SKEW_D:
             return new NonNegativeCompactingDecorator(
-                    new ExtraCellsZeroIndexDecorator(new KarkkainenSanders(), 3));
+                    new ExtraCellsZeroIndexDecorator(new Skew(), 3));
 
         case NS_2:
             return new NaiveSort2();
 
-        case MORI:
-            return new Mori();
+        case DIVSUFSORT:
+            return new DivSufSort();
 
         case SAIS:
             return new SAIS();

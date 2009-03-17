@@ -4,13 +4,13 @@ import org.junit.Before;
 import org.junit.Ignore;
 
 /**
- * Tests for {@link Mori}.
+ * Tests for {@link DivSufSort}.
  */
-public class MoriTest extends SuffixArrayBuilderTestBase {
+public class DivSufSortTest extends SuffixArrayBuilderTestBase {
     @Before
     public void setupForConstraints() {
         smallAlphabet = new MinMax(1, 10);
-        largeAlphabet = new MinMax(1, Mori.ALPHABET_SIZE - 1);
+        largeAlphabet = new MinMax(1, DivSufSort.ALPHABET_SIZE - 1);
     }
 
     /*
@@ -18,7 +18,7 @@ public class MoriTest extends SuffixArrayBuilderTestBase {
      */
     @Override
     protected ISuffixArrayBuilder getInstance() {
-        return new Mori();
+        return new DivSufSort();
     }
 
     /*
@@ -28,6 +28,6 @@ public class MoriTest extends SuffixArrayBuilderTestBase {
     @Ignore
     public void sameResultWithArraySlice()
     {
-        // Ignore this test, Mori require start == 0
+        // Ignore this test, DivSufSort require start == 0
     }
 }

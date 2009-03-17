@@ -76,7 +76,7 @@ public final class SuffixArrays
     public static SuffixData createWithLCP(int [] input, int start, int length)
     {
         final ISuffixArrayBuilder builder = new NonNegativeCompactingDecorator(
-            new ExtraCellsZeroIndexDecorator(new KarkkainenSanders(), 3));
+            new ExtraCellsZeroIndexDecorator(new Skew(), 3));
 
         return createWithLCP(input, start, length, builder);
     }
@@ -140,7 +140,7 @@ public final class SuffixArrays
      */
     private static ISuffixArrayBuilder defaultAlgorithm()
     {
-        return new KarkkainenSanders();
+        return new Skew();
     }
 
     /**

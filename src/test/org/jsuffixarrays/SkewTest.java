@@ -15,9 +15,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * Tests for {@link KarkkainenSanders}.
+ * Tests for {@link Skew}.
  */
-public class KarkkainenSandersTest extends SuffixArrayBuilderTestBase
+public class SkewTest extends SuffixArrayBuilderTestBase
 {
     @Before
     public void setupForConstraints() 
@@ -32,7 +32,7 @@ public class KarkkainenSandersTest extends SuffixArrayBuilderTestBase
     @Override
     protected ISuffixArrayBuilder getInstance()
     {
-        return new KarkkainenSanders();
+        return new Skew();
     }
 
     /**
@@ -157,7 +157,7 @@ public class KarkkainenSandersTest extends SuffixArrayBuilderTestBase
                 for (int j = 0; j < N; j++)
                 {
                     printV(s, n, "s");
-                    KarkkainenSanders.suffixArray(s, SA, n, b);
+                    Skew.suffixArray(s, SA, n, b);
                     Assert.assertTrue(s[n] == 0);
                     Assert.assertTrue(s[n + 1] == 0);
                     Assert.assertTrue(SA[n] == 0);
