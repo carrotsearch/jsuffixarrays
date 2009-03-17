@@ -1,11 +1,11 @@
 package org.jsuffixarrays;
 
 /**
- * An enum with constants indicating algorithms and their variants. This is of little
- * practical use, but a handy factory method {@link #getInstance()} is also provided.
+ * An enum with constants indicating algorithms and their variants. This is of
+ * little practical use, but a handy factory method {@link #getInstance()} is
+ * also provided.
  */
-public enum Algorithm
-{
+public enum Algorithm {
     /** Karkkainen-Sanders. */
     KS("Kärkkäinen-Sanders"),
 
@@ -19,7 +19,10 @@ public enum Algorithm
     MORI("Mori's algorithm"),
 
     /** Yuta Mori's implementation of SA-IS. */
-    SAIS("SA-IS algorithm");
+    SAIS("SA-IS algorithm"),
+
+    /** "Larrson-Sadakane qsufsort algorithm */
+    QSUFSORT("Larrson-Sadakane qsufsort algorithm");
 
     /** Full name of the algorithm. */
     private final String name;
@@ -27,33 +30,33 @@ public enum Algorithm
     /*
      * 
      */
-    private Algorithm(String name)
-    {
+    private Algorithm(String name) {
         this.name = name;
     }
 
     /**
      * @return Create and return an algorithm instance.
      */
-    public ISuffixArrayBuilder getInstance()
-    {
-        switch (this)
-        {
-            case KS:
-                return new KarkkainenSanders();
+    public ISuffixArrayBuilder getInstance() {
+        switch (this) {
+        case KS:
+            return new KarkkainenSanders();
 
-            case KS_D:
-                return new NonNegativeCompactingDecorator(
+        case KS_D:
+            return new NonNegativeCompactingDecorator(
                     new ExtraCellsZeroIndexDecorator(new KarkkainenSanders(), 3));
 
-            case NS_2:
-                return new NaiveSort2();
+        case NS_2:
+            return new NaiveSort2();
 
-            case MORI:
-                return new Mori();
+        case MORI:
+            return new Mori();
 
-            case SAIS:
-                return new SAIS();
+        case SAIS:
+            return new SAIS();
+
+        case QSUFSORT:
+            return new QSufSort();
         }
 
         throw new RuntimeException("No algorithm for constant: " + this);
@@ -62,8 +65,7 @@ public enum Algorithm
     /**
      * Return the full name of the algorithm.
      */
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 }

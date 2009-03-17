@@ -8,7 +8,7 @@
 
 	<property name="compiled.classes.dir" location="tmp/build/classes" />
 	<property name="compiled.tests.dir" location="tmp/build/test" />
-	<property name="corpus.dir" location="corpus" />
+	<property name="corpus.dir" location="../corpus" />
 
 	<property name="debuglevel" value="source,lines,vars" />
 
@@ -131,7 +131,7 @@
 			<classpath location="lib/ant-contrib-1.0b3.jar" />
 		</taskdef>
 
-		<property name="algorithms" value="NS_2 KS MORI SAIS" />
+		<property name="algorithms" value="NS_2 KS MORI SAIS QSUFSORT" />
 
 		<delete dir="${perf.logs}" failonerror="false" />
 		<mkdir dir="${perf.logs}" />
@@ -181,14 +181,12 @@
 			        <path location="${compiled.tests.dir}" />
 			        <path location="${compiled.classes.dir}" />
 				</pathconvert>
-
 	    		<propertyregex input="@{stdoutput}" property="stdoutput.repl"
 	              regexp="\-JVM" replace="-@{id}" override="true" />
 	    		<propertyregex input="@{stderror}" property="stderror.repl"
 	              regexp="\-JVM" replace="-@{id}" override="true" />
 	    		<propertyregex input="@{args}" property="args.repl"
 	              regexp="\-JVM" replace="-@{id}" override="true" />
-	    		
 				<exec executable="${@{jvm}.home}/bin/java" 
 					failonerror="true" failifexecutionfails="true" vmlauncher="false" 
 					output="${stdoutput.repl}" error="${stderror.repl}">
