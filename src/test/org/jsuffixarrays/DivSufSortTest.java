@@ -7,10 +7,12 @@ import org.junit.Ignore;
  * Tests for {@link DivSufSort}.
  */
 public class DivSufSortTest extends SuffixArrayBuilderTestBase {
+    private final int alphabetSize = 256;
+
     @Before
     public void setupForConstraints() {
         smallAlphabet = new MinMax(1, 10);
-        largeAlphabet = new MinMax(1, DivSufSort.ALPHABET_SIZE - 1);
+        largeAlphabet = new MinMax(1, alphabetSize - 1);
     }
 
     /*
@@ -18,7 +20,7 @@ public class DivSufSortTest extends SuffixArrayBuilderTestBase {
      */
     @Override
     protected ISuffixArrayBuilder getInstance() {
-        return new DivSufSort();
+        return new DivSufSort(alphabetSize);
     }
 
     /*
@@ -26,8 +28,7 @@ public class DivSufSortTest extends SuffixArrayBuilderTestBase {
      */
     @Override
     @Ignore
-    public void sameResultWithArraySlice()
-    {
+    public void sameResultWithArraySlice() {
         // Ignore this test, DivSufSort require start == 0
     }
 }

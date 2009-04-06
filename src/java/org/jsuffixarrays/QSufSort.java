@@ -70,6 +70,8 @@ public class QSufSort implements ISuffixArrayBuilder {
     @Override
     public final int[] buildSuffixArray(int[] input, int start, int length) {
         assertAlways(start == 0, "start index is not zero");
+        assertAlways(input.length >= start + length + 1,
+                "no extra space after input end");
         MinMax minmax = Tools.minmax(input, start, length);
         assertAlways(minmax.min >= 0, "input must not be negative");
         I = new int[length + 1];

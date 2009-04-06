@@ -2,9 +2,6 @@ package org.jsuffixarrays;
 
 import static org.jsuffixarrays.Tools.assertAlways;
 
-// TODO: maybe we should consider creating some kind of
-// "signed to unsigned char" mapper?
-
 // TODO: Add proper attribution.
 /**
  * <p>
@@ -84,14 +81,28 @@ public final class DivSufSort implements ISuffixArrayBuilder {
         }
     }
 
+    public DivSufSort() {
+        ALPHABET_SIZE = DEFAULT_ALPHABET_SIZE;
+        BUCKET_A_SIZE = ALPHABET_SIZE;
+        BUCKET_B_SIZE = ALPHABET_SIZE * ALPHABET_SIZE;
+    }
+
+    /**
+     * @param alphabetSize
+     */
+    public DivSufSort(int alphabetSize) {
+        ALPHABET_SIZE = alphabetSize;
+        BUCKET_A_SIZE = ALPHABET_SIZE;
+        BUCKET_B_SIZE = ALPHABET_SIZE * ALPHABET_SIZE;
+    }
+
     /* constants */
 
-    public final static int ALPHABET_SIZE = 256;
-    // private final static int DEFAULT_ALPHABET_SIZE = 256;
+    private final int ALPHABET_SIZE;
+    private final int BUCKET_A_SIZE;
+    private final int BUCKET_B_SIZE;
 
-    private final static int BUCKET_A_SIZE = ALPHABET_SIZE;
-    private final static int BUCKET_B_SIZE = ALPHABET_SIZE * ALPHABET_SIZE;
-
+    private final static int DEFAULT_ALPHABET_SIZE = 256;
     private final static int SS_INSERTIONSORT_THRESHOLD = 8;
     private final static int SS_BLOCKSIZE = 1024;
     private final static int SS_MISORT_STACKSIZE = 16;
@@ -193,10 +204,11 @@ public final class DivSufSort implements ISuffixArrayBuilder {
                 /* Scan the suffix array from right to left. */
                 for (i = bucket_B[(c1) * ALPHABET_SIZE + (c1 + 1)], j = bucket_A[c1 + 1] - 1, k = 0, c2 = -1; i <= j; --j) {
                     if (0 < (s = SA[j])) {
-                        Tools.assertAlways(T[s] == c1, "");
-                        Tools.assertAlways(((s + 1) < n) && (T[s] <= T[s + 1]),
-                                "");
-                        Tools.assertAlways(T[s - 1] <= T[s], "");
+                        // Tools.assertAlways(T[s] == c1, "");
+                        // Tools.assertAlways(((s + 1) < n) && (T[s] <= T[s +
+                        // 1]),
+                        // "");
+                        // Tools.assertAlways(T[s - 1] <= T[s], "");
                         SA[j] = ~s;
                         c0 = T[--s];
                         if ((0 < s) && (T[s - 1] > c0)) {
@@ -208,11 +220,11 @@ public final class DivSufSort implements ISuffixArrayBuilder {
                             }
                             k = bucket_B[(c1) * ALPHABET_SIZE + (c2 = c0)];
                         }
-                        Tools.assertAlways(k < j, "");
+                        // Tools.assertAlways(k < j, "");
                         SA[k--] = s;
                     } else {
-                        Tools.assertAlways(((s == 0) && (T[s] == c1))
-                                || (s < 0), "");
+                        // Tools.assertAlways(((s == 0) && (T[s] == c1))
+                        // || (s < 0), "");
                         SA[j] = ~s;
                     }
                 }
@@ -227,7 +239,7 @@ public final class DivSufSort implements ISuffixArrayBuilder {
         /* Scan the suffix array from left to right. */
         for (i = 0, j = n; i < j; ++i) {
             if (0 < (s = SA[i])) {
-                Tools.assertAlways(T[s - 1] >= T[s], "");
+                // Tools.assertAlways(T[s - 1] >= T[s], "");
                 c0 = T[--s];
                 if ((s == 0) || (T[s - 1] < c0)) {
                     s = ~s;
@@ -236,10 +248,10 @@ public final class DivSufSort implements ISuffixArrayBuilder {
                     bucket_A[c2] = k;
                     k = bucket_A[c2 = c0];
                 }
-                Tools.assertAlways(i < k, "");
+                // Tools.assertAlways(i < k, "");
                 SA[k++] = s;
             } else {
-                Tools.assertAlways(s < 0, "");
+                // Tools.assertAlways(s < 0, "");
                 SA[i] = ~s;
             }
         }
@@ -392,56 +404,41 @@ public final class DivSufSort implements ISuffixArrayBuilder {
             ++first;
         }
 
-        if (SS_BLOCKSIZE == 0) {
-            ssMintroSort(PA, first, last, depth);
+        if ((bufsize < SS_BLOCKSIZE) && (bufsize < (last - first))
+                && (bufsize < (limit = ssIsqrt(last - first)))) {
+            if (SS_BLOCKSIZE < limit) {
+                limit = SS_BLOCKSIZE;
+            }
+            buf = middle = last - limit;
+            bufsize = limit;
         } else {
-            if ((bufsize < SS_BLOCKSIZE) && (bufsize < (last - first))
-                    && (bufsize < (limit = ssIsqrt(last - first)))) {
-                if (SS_BLOCKSIZE < limit) {
-                    limit = SS_BLOCKSIZE;
-                }
-                buf = middle = last - limit;
-                bufsize = limit;
-            } else {
-                middle = last;
-                limit = 0;
+            middle = last;
+            limit = 0;
+        }
+        for (a = first, i = 0; SS_BLOCKSIZE < (middle - a); a += SS_BLOCKSIZE, ++i) {
+            ssMintroSort(PA, a, a + SS_BLOCKSIZE, depth);
+            curbufsize = last - (a + SS_BLOCKSIZE);
+            curbuf = a + SS_BLOCKSIZE;
+            if (curbufsize <= bufsize) {
+                curbufsize = bufsize;
+                curbuf = buf;
             }
-            for (a = first, i = 0; SS_BLOCKSIZE < (middle - a); a += SS_BLOCKSIZE, ++i) {
-                if (SS_INSERTIONSORT_THRESHOLD < SS_BLOCKSIZE) {
-                    ssMintroSort(PA, a, a + SS_BLOCKSIZE, depth);
-                } else if (1 < SS_BLOCKSIZE) {
-                    ssInsertionSort(PA, a, a + SS_BLOCKSIZE, depth);
-                }
-                curbufsize = last - (a + SS_BLOCKSIZE);
-                curbuf = a + SS_BLOCKSIZE;
-                if (curbufsize <= bufsize) {
-                    curbufsize = bufsize;
-                    curbuf = buf;
-                }
-                for (b = a, k = SS_BLOCKSIZE, j = i; (j & 1) != 0; b -= k, k <<= 1, j >>= 1) {
-                    ssSwapMerge(PA, b - k, b, b + k, curbuf, curbufsize, depth);
-                }
-            }
-            if (SS_INSERTIONSORT_THRESHOLD < SS_BLOCKSIZE) {
-                ssMintroSort(PA, a, middle, depth);
-            } else if (1 < SS_BLOCKSIZE) {
-                ssInsertionSort(PA, a, middle, depth);
-            }
-            for (k = SS_BLOCKSIZE; i != 0; k <<= 1, i >>= 1) {
-                if ((i & 1) != 0) {
-                    ssSwapMerge(PA, a - k, a, middle, buf, bufsize, depth);
-                    a -= k;
-                }
-            }
-            if (limit != 0) {
-                if (SS_INSERTIONSORT_THRESHOLD < SS_BLOCKSIZE) {
-                    ssMintroSort(PA, middle, last, depth);
-                } else if (1 < SS_BLOCKSIZE) {
-                    ssInsertionSort(PA, middle, last, depth);
-                }
-                ssInplaceMerge(PA, first, middle, last, depth);
+            for (b = a, k = SS_BLOCKSIZE, j = i; (j & 1) != 0; b -= k, k <<= 1, j >>= 1) {
+                ssSwapMerge(PA, b - k, b, b + k, curbuf, curbufsize, depth);
             }
         }
+        ssMintroSort(PA, a, middle, depth);
+        for (k = SS_BLOCKSIZE; i != 0; k <<= 1, i >>= 1) {
+            if ((i & 1) != 0) {
+                ssSwapMerge(PA, a - k, a, middle, buf, bufsize, depth);
+                a -= k;
+            }
+        }
+        if (limit != 0) {
+            ssMintroSort(PA, middle, last, depth);
+            ssInplaceMerge(PA, first, middle, last, depth);
+        }
+
         if (lastsuffix) {
             int p1 = SA[PA + SA[first - 1]];
             int p11 = n - 2;
@@ -1018,10 +1015,8 @@ public final class DivSufSort implements ISuffixArrayBuilder {
         for (ssize = 0, limit = ssIlg(last - first);;) {
 
             if ((last - first) <= SS_INSERTIONSORT_THRESHOLD) {
-                if (1 < SS_INSERTIONSORT_THRESHOLD) {
-                    if (1 < (last - first)) {
-                        ssInsertionSort(PA, first, last, depth);
-                    }
+                if (1 < (last - first)) {
+                    ssInsertionSort(PA, first, last, depth);
                 }
                 if (ssize > 0) {
                     StackElement se = stack[--ssize];
@@ -1373,17 +1368,9 @@ public final class DivSufSort implements ISuffixArrayBuilder {
      *
      */
     private final static int ssIlg(int n) {
-        if (SS_BLOCKSIZE == 0) {
-            return ((n & 0xffff0000) != 0) ? (((n & 0xff000000) != 0) ? 24 + lg_table[(n >> 24) & 0xff]
-                    : 16 + lg_table[(n >> 16) & 0xff])
-                    : (((n & 0x0000ff00) != 0) ? 8 + lg_table[(n >> 8) & 0xff]
-                            : 0 + lg_table[(n >> 0) & 0xff]);
-        } else if (SS_BLOCKSIZE < 256) {
-            return lg_table[n];
-        } else {
-            return ((n & 0xff00) != 0) ? 8 + lg_table[(n >> 8) & 0xff]
-                    : 0 + lg_table[(n >> 0) & 0xff];
-        }
+
+        return ((n & 0xff00) != 0) ? 8 + lg_table[(n >> 8) & 0xff]
+                : 0 + lg_table[(n >> 0) & 0xff];
     }
 
     /**
