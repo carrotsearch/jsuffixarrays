@@ -137,7 +137,7 @@
 		<delete dir="${perf.logs}" failonerror="false" />
 		<mkdir dir="${perf.logs}" />
 
-		<foreach list="${algorithms}" delimiter=" " param="algorithm" target="perf.random" />
+		<!-- <foreach list="${algorithms}" delimiter=" " param="algorithm" target="perf.random" /> -->
 		<foreach list="${algorithms}" delimiter=" " param="algorithm" target="perf.textfiles" />
 	</target>
 	
@@ -146,8 +146,9 @@
           <include name="**/*"/>
         </fileset>
 		
+		<echo>${basedir}</echo>
 		<pathconvert pathsep=", " property="filenames" refid="files">
-			<map from="${basedir}\" to=''/>
+			<map from="${corpus.dir}/" to=''/>
 		</pathconvert>
 		
 	  <property name="algorithm" value="${algorithm}" />
@@ -295,7 +296,7 @@
 	        <var name="args" value="
 	            org.jsuffixarrays.TimeOnFile
 	            ${algorithm}
-	        	${filename}
+	        	${corpus.dir}/${filename}
 	            --rounds 20
 	            --warmup-rounds 5
 	        " />
