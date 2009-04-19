@@ -131,7 +131,8 @@
 			<classpath location="lib/ant-contrib-1.0b3.jar" />
 		</taskdef>
 
-		<property name="algorithms" value="NS_2 SKEW DIVSUFSORT SAIS QSUFSORT" />
+		<property name="algorithms" value="DIVSUFSORT BPR" />
+		<!-- <property name="algorithms" value="NS_2 SKEW DIVSUFSORT SAIS QSUFSORT" /> -->
 
 		<delete dir="${perf.logs}" failonerror="false" />
 		<mkdir dir="${perf.logs}" />
@@ -292,7 +293,7 @@
 	            location="${perf.logs}/${filename}" />
 
 	        <var name="args" value="
-	            org.jsuffixarrays.TimeOnTextFile
+	            org.jsuffixarrays.TimeOnFile
 	            ${algorithm}
 	        	${filename}
 	            --rounds 20

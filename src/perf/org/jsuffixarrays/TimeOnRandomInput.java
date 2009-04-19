@@ -44,7 +44,7 @@ public class TimeOnRandomInput {
     public int warmup = 10;
 
     @Option(aliases = { "--extra-cells" }, metaVar = "int", name = "-e", required = false, usage = "Extra allocated input cells")
-    public int extraCells = 3;
+    public int extraCells = BPR.KBS_STRING_EXTENSION_SIZE;
 
     @Option(aliases = { "--alphabet-size" }, metaVar = "int", name = "-a", required = false, usage = "Alphabet size (>= 1)")
     public int alphabetSize = 100;

@@ -21,6 +21,9 @@ public enum Algorithm {
     /** Yuta Mori's implementation of SA-IS. */
     SAIS("SA-IS algorithm"),
 
+    /** Klaus-Bernd Schürmann's bucket pointer refinement algorithm */
+    BPR("Klaus-Bernd Schürmann's bpr algorithm"),
+
     /** "Larrson-Sadakane qsufsort algorithm */
     QSUFSORT("Larrson-Sadakane qsufsort algorithm");
 
@@ -57,6 +60,10 @@ public enum Algorithm {
 
         case QSUFSORT:
             return new QSufSort();
+
+        case BPR:
+            return new BPR();
+
         }
 
         throw new RuntimeException("No algorithm for constant: " + this);

@@ -35,7 +35,7 @@ public class TimeOnFile {
     public int warmup = 10;
 
     @Option(aliases = { "--extra-cells" }, metaVar = "int", name = "-e", required = false, usage = "Extra allocated input cells")
-    public int extraCells = 3;
+    public int extraCells = BPR.KBS_STRING_EXTENSION_SIZE;
 
     @Option(aliases = { "--output-file" }, metaVar = "file", name = "-o", required = false, usage = "Output file (if not given, stdout is used)")
     public File output;

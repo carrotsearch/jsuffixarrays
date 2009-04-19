@@ -6,15 +6,14 @@ import org.junit.Ignore;
 /**
  * Tests for {@link DivSufSort}.
  */
-public class DivSufSortTest extends SuffixArrayBuilderTestBase
+public class BPRTest extends SuffixArrayBuilderTestBase
 {
-    private final int alphabetSize = 256;
 
     @Before
     public void setupForConstraints()
     {
         smallAlphabet = new MinMax(1, 10);
-        largeAlphabet = new MinMax(1, alphabetSize - 1);
+        largeAlphabet = new MinMax(1, 255);
     }
 
     /*
@@ -23,16 +22,14 @@ public class DivSufSortTest extends SuffixArrayBuilderTestBase
     @Override
     protected ISuffixArrayBuilder getInstance()
     {
-        return new DivSufSort(alphabetSize);
+        return new BPR();
     }
 
-    /*
-     * 
-     */
     @Override
     @Ignore
     public void sameResultWithArraySlice()
     {
         // Ignore this test, DivSufSort require start == 0
     }
+
 }

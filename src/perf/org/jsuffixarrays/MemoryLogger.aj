@@ -154,3 +154,15 @@ aspect QSUfSortMemLogger extends MemoryLogger
     pointcut excludedMethods(): execution(private * *(..));
 }
 
+/**
+ * Track memory in {@link NaiveSort2} algorithm.
+ */
+aspect BPRMemLogger extends MemoryLogger
+{
+    @Override
+    pointcut tracedClasses() : within(BPR);
+    @Override
+    pointcut excludedMethods(): execution(private * *(..));
+}
+
+

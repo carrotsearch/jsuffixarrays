@@ -140,9 +140,8 @@ public abstract class SuffixArrayBuilderTestBase {
             final int[] copy = input.clone();
 
             final int start = 0;
-            final int length = input.length - 3;
+            final int length = input.length - BPR.KBS_STRING_EXTENSION_SIZE;
             final int[] SA = builder.buildSuffixArray(input, start, length);
-
             Assert.assertArrayEquals(input, copy);
             assertPermutation(SA, length);
             assertSorted(SA, input, length);

@@ -98,10 +98,6 @@ public final class DivSufSort implements ISuffixArrayBuilder {
 
     /* constants */
 
-    private final int ALPHABET_SIZE;
-    private final int BUCKET_A_SIZE;
-    private final int BUCKET_B_SIZE;
-
     private final static int DEFAULT_ALPHABET_SIZE = 256;
     private final static int SS_INSERTIONSORT_THRESHOLD = 8;
     private final static int SS_BLOCKSIZE = 1024;
@@ -146,7 +142,9 @@ public final class DivSufSort implements ISuffixArrayBuilder {
             7, 7, 7 };
 
     /* fields */
-
+    private final int ALPHABET_SIZE;
+    private final int BUCKET_A_SIZE;
+    private final int BUCKET_B_SIZE;
     private int[] SA;
     private int[] T;
 
