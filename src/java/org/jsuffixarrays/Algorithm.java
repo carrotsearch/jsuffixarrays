@@ -1,11 +1,11 @@
 package org.jsuffixarrays;
 
 /**
- * An enum with constants indicating algorithms and their variants. This is of
- * little practical use, but a handy factory method {@link #getInstance()} is
- * also provided.
+ * An enum with constants indicating algorithms and their variants. This is of little
+ * practical use, but a handy factory method {@link #getInstance()} is also provided.
  */
-public enum Algorithm {
+public enum Algorithm
+{
     /** Karkkainen-Sanders. */
     SKEW("Kärkkäinen-Sanders"),
 
@@ -24,6 +24,8 @@ public enum Algorithm {
     /** Klaus-Bernd Schürmann's bucket pointer refinement algorithm */
     BPR("Klaus-Bernd Schürmann's bpr algorithm"),
 
+    DEEP_SHALLOW("Manzini-Ferragin"),
+
     /** "Larrson-Sadakane qsufsort algorithm */
     QSUFSORT("Larrson-Sadakane qsufsort algorithm");
 
@@ -33,36 +35,42 @@ public enum Algorithm {
     /*
      * 
      */
-    private Algorithm(String name) {
+    private Algorithm(String name)
+    {
         this.name = name;
     }
 
     /**
      * @return Create and return an algorithm instance.
      */
-    public ISuffixArrayBuilder getInstance() {
-        switch (this) {
-        case SKEW:
-            return new Skew();
+    public ISuffixArrayBuilder getInstance()
+    {
+        switch (this)
+        {
+            case SKEW:
+                return new Skew();
 
-        case SKEW_D:
-            return new NonNegativeCompactingDecorator(
+            case SKEW_D:
+                return new NonNegativeCompactingDecorator(
                     new ExtraCellsZeroIndexDecorator(new Skew(), 3));
 
-        case NS_2:
-            return new NaiveSort2();
+            case NS_2:
+                return new NaiveSort2();
 
-        case DIVSUFSORT:
-            return new DivSufSort();
+            case DIVSUFSORT:
+                return new DivSufSort();
 
-        case SAIS:
-            return new SAIS();
+            case SAIS:
+                return new SAIS();
 
-        case QSUFSORT:
-            return new QSufSort();
+            case QSUFSORT:
+                return new QSufSort();
 
-        case BPR:
-            return new BPR();
+            case BPR:
+                return new BPR();
+
+            case DEEP_SHALLOW:
+                return new DeepShallow();
 
         }
 
@@ -70,9 +78,24 @@ public enum Algorithm {
     }
 
     /**
+     * @return mapper for input read from file, or null if isn't needed.
+     */
+    public IMapper getMapper(int [] input, int start, int length)
+    {
+        switch (this)
+        {
+            // skew requires positive (>0) input
+            case SKEW:
+                return new PositiveMapper(input, start, length);
+        }
+        return null;
+    }
+
+    /**
      * Return the full name of the algorithm.
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 }

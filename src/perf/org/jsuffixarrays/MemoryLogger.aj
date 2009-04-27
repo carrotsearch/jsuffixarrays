@@ -144,7 +144,7 @@ aspect DivSufSortMemLogger extends MemoryLogger
 }
 
 /**
- * Track memory in {@link NaiveSort2} algorithm.
+ * Track memory in {@link QSufSort} algorithm.
  */
 aspect QSUfSortMemLogger extends MemoryLogger
 {
@@ -155,7 +155,7 @@ aspect QSUfSortMemLogger extends MemoryLogger
 }
 
 /**
- * Track memory in {@link NaiveSort2} algorithm.
+ * Track memory in {@link BPR} algorithm.
  */
 aspect BPRMemLogger extends MemoryLogger
 {
@@ -164,5 +164,17 @@ aspect BPRMemLogger extends MemoryLogger
     @Override
     pointcut excludedMethods(): execution(private * *(..));
 }
+
+/**
+ * Track memory in {@link DeepShallow} algorithm.
+ */
+aspect DeepShallowMemLogger extends MemoryLogger
+{
+    @Override
+    pointcut tracedClasses() : within(DeepShallow);
+    @Override
+    pointcut excludedMethods(): execution(private * *(..));
+}
+    
 
 

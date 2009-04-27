@@ -4,6 +4,7 @@ import static org.jsuffixarrays.Tools.assertAlways;
 
 import java.util.Arrays;
 
+//TODO: documentation
 public class DeepShallow implements ISuffixArrayBuilder
 {
     class SplitGroupResult
@@ -223,7 +224,6 @@ public class DeepShallow implements ISuffixArrayBuilder
             bigDone[ss] = true;
         }// endfor
 
-        // dumpArrayLines(Sa, length);
         return Sa;
     }
 
@@ -363,8 +363,7 @@ public class DeepShallow implements ISuffixArrayBuilder
      * a[j-4] and go on. if lcp[j]>lcp[j-3] we are in the following position: j-3 mmmmmmc
      * j-2 mmmmmmmmmmmmmmmg j-1 mmmmmmmmmmmmmmmm j mmmmmmmmmmf and we know that suf(ai) is
      * larger than suf(a[j-3]). If we find that lcpi==lcp[j-3] then we must compare
-     * suf(ai) with suf(a[j-3]) but starting with position
-     * lcpi****************************************************************
+     * suf(ai) with suf(a[j-3]) but starting with position lcpi
      */
     private void shallow_inssort_lcp(int a, int n, int text_depth)
     {

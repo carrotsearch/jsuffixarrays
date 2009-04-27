@@ -44,7 +44,7 @@ public class TimeOnFile
     {
         "--extra-cells"
     }, metaVar = "int", name = "-e", required = false, usage = "Extra allocated input cells")
-    public int extraCells = BPR.KBS_STRING_EXTENSION_SIZE;
+    public int extraCells = DeepShallow.overshoot;
 
     @Option(aliases =
     {
@@ -114,8 +114,11 @@ public class TimeOnFile
         }
 
         final int start = 0;
-        final IMapper mapper = new DensePositiveMapper(input, start, size);
-        mapper.map(input, start, size);
+        final IMapper mapper = algorithm.getMapper(input, start, size);
+        if (mapper != null)
+        {
+            mapper.map(input, start, size);
+        }
 
         out.println(String.format(Locale.US, "%4s " + "%7s " + "%7s " + "%7s " + "%5s  "
             + "%s", "rnd", "size", "time", "mem(MB)", "av.lcp", "status"));

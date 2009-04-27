@@ -131,13 +131,13 @@
 			<classpath location="lib/ant-contrib-1.0b3.jar" />
 		</taskdef>
 
-		<property name="algorithms" value="DIVSUFSORT BPR" />
-		<!-- <property name="algorithms" value="NS_2 SKEW DIVSUFSORT SAIS QSUFSORT" /> -->
+		<!-- <property name="algorithms" value="NS_2 SKEW DIVSUFSORT SAIS QSUFSORT BPR DEEP_SHALLOW" /> -->
+		<property name="algorithms" value="DIVSUFSORT BPR DEEP_SHALLOW" />
 
 		<delete dir="${perf.logs}" failonerror="false" />
 		<mkdir dir="${perf.logs}" />
 
-		<!-- <foreach list="${algorithms}" delimiter=" " param="algorithm" target="perf.random" /> -->
+		<foreach list="${algorithms}" delimiter=" " param="algorithm" target="perf.random" />
 		<foreach list="${algorithms}" delimiter=" " param="algorithm" target="perf.textfiles" />
 	</target>
 	
