@@ -4,7 +4,33 @@ import static org.jsuffixarrays.Tools.assertAlways;
 
 import java.util.Arrays;
 
-//TODO: documentation
+//TODO: investigate strange behaviour when start != 0 in DeepShallow
+/*
+ * [MN]
+ * how to recreate this strange behaviour:
+ * 1. use System.arraycopy to create Text array (size = length + overshoot, copy input from start) __OR__ replace all occurences of Text[ with Text[start + 
+ * 2. delete code from DeepShallowTest that ignores sameResultWithArraySlice()
+ * 3. make sure that line Tools.assertAlways(start == 0, "start index is not zero"); in buildSuffixArray is uncommented
+ * 4. run tests -- only sameResultWithArraySlice() should fail
+ * 5. comment or delete Tools.assertAlways(start == 0, "start index is not zero");
+ * 6. run test -- sameResultWithArraySlice() will pass, but both tests on random input will fail
+ * ???
+ * 
+ * I tried reseting all fields of this class at the start of buildSuffixArray, but it didn't help.
+ */
+
+/**
+ * <p>
+ * Straightforward reimplementation of deep-shallow algorithm given in: <tt>
+ * Giovanni Manzini and Paolo Ferragina. Engineering a lightweight suffix array construction algorithm.
+ * </tt>
+ * <p>
+ * This implementation is basically a translation of the C version given by Giovanni
+ * Manzini
+ * <p>
+ * The implementation of this algorithm makes some assumptions about the input. See
+ * {@link #buildSuffixArray(int[], int, int)} for details.
+ */
 public class DeepShallow implements ISuffixArrayBuilder
 {
     class SplitGroupResult
@@ -78,16 +104,31 @@ public class DeepShallow implements ISuffixArrayBuilder
         this.preserveInput = preserveInput;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Additional constraints enforced by Deep-Shallow algorithm:
+     * <ul>
+     * <li>non-negative ( &ge; 0) symbols in the input</li>
+     * <li>maximal symbol value &lt; <code>256</code></li>
+     * <li><code>input.length</code> &gt;=
+     * <code>start + length + {@link #overshoot}</code></li>
+     * <li>length >= 2</li>
+     * <li>start == 0</li>
+     * </ul>
+     */
     @Override
     public int [] buildSuffixArray(int [] input, int start, int length)
     {
-        lcp = 1;
-        assertAlways(start == 0, "start index is not zero");
+
+        Tools.assertAlways(start == 0, "start index is not zero");
         Tools.assertAlways(overshoot == Shallow_limit + Cmp_overshoot + 9, "");
         Tools.assertAlways(input.length >= start + length + overshoot, "");
         MinMax mm = Tools.minmax(input, start, length);
         assertAlways(mm.min >= 0, "input must not be negative");
         assertAlways(mm.max < 256, "max alphabet size is 256");
+
+        lcp = 1;
         Stack = new Node [length];
         if (preserveInput)
         {
@@ -97,6 +138,7 @@ public class DeepShallow implements ISuffixArrayBuilder
         {
             Text = input;
         }
+
         for (int i = length; i < length + overshoot; i++)
         {
             Text[i] = 0;
@@ -431,7 +473,6 @@ public class DeepShallow implements ISuffixArrayBuilder
                 if (lcp_aux[lcp + j] < cmp_from_limit) break;
             if (j - i > 0) helped_sort(a + i, j - i + 1, Shallow_limit);
         }
-        /* // */
     }
 
     /**

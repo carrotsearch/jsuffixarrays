@@ -74,6 +74,8 @@ public class BPR implements ISuffixArrayBuilder
     private int [] suffixArray;
     private int [] sufPtrMap;
 
+    private int start;
+
     public BPR()
     {
         preserveInput = true;
@@ -95,8 +97,6 @@ public class BPR implements ISuffixArrayBuilder
      * <li>symbols limited by {@link #KBS_MAX_ALPHABET_SIZE} (&lt;
      * <code>KBS_MAX_ALPHABET_SIZE</code>)</li>
      * <li>length >= 2</li>
-     * <li>start == 0 (this could be removed if we alter the original algorithm and add
-     * offsets)</li>
      * </ul>
      * <p>
      */
@@ -107,7 +107,7 @@ public class BPR implements ISuffixArrayBuilder
         Tools.assertAlways(input.length >= start + length + KBS_STRING_EXTENSION_SIZE,
             "input is too short");
         Tools.assertAlways(length >= 2, "input length must be >= 2");
-        Tools.assertAlways(start == 0, "start index is not zero");
+        this.start = start;
         if (preserveInput)
         {
             seq = input.clone();
@@ -218,8 +218,8 @@ public class BPR implements ISuffixArrayBuilder
             }
             if (c1 == 0)
             {
-                int cp1 = seq[mappedCharPtr + length - 1];
-                int cp2 = seq[mappedCharPtr + length - 2];
+                int cp1 = seq[start + mappedCharPtr + length - 1];
+                int cp2 = seq[start + mappedCharPtr + length - 2];
                 if (isNotSortedLevel1Char[cp1] != 0)
                 {
                     leftPtrList[cp1]++;
@@ -239,9 +239,10 @@ public class BPR implements ISuffixArrayBuilder
                 int cp1;
                 int tmpUlong = suffixArray[leftPtr];
                 if (tmpUlong != 0
-                    && isNotSortedLevel1Char[cp1 = seq[mappedCharPtr + tmpUlong - 1]] != 0)
+                    && isNotSortedLevel1Char[cp1 = seq[start + mappedCharPtr + tmpUlong
+                        - 1]] != 0)
                 {
-                    if (isNotSortedLevel1Char[seq[mappedCharPtr + tmpUlong + 1]] != 0)
+                    if (isNotSortedLevel1Char[seq[start + mappedCharPtr + tmpUlong + 1]] != 0)
                     {
                         int tmpUlongPtr = leftPtrList[cp1];
                         sufPtrMap[tmpUlong - 1] = tmpUlongPtr;
@@ -250,8 +251,8 @@ public class BPR implements ISuffixArrayBuilder
                     leftPtrList[cp1]++;
                     int cp2;
                     if (tmpUlong > 1
-                        && isNotSortedLevel1Char[cp2 = seq[mappedCharPtr + tmpUlong - 2]] != 0
-                        && cp2 != c1)
+                        && isNotSortedLevel1Char[cp2 = seq[start + mappedCharPtr
+                            + tmpUlong - 2]] != 0 && cp2 != c1)
                     {
                         int tmpUlongPtr = leftPtrList2[cp2 * alphabetSize + cp1]++;
                         sufPtrMap[tmpUlong - 2] = tmpUlongPtr;
@@ -283,10 +284,11 @@ public class BPR implements ISuffixArrayBuilder
                 rightPtr--;
                 int tmpUlong = suffixArray[rightPtr];
                 if (tmpUlong != 0
-                    && isNotSortedLevel1Char[cp1 = seq[mappedCharPtr + tmpUlong - 1]] != 0)
+                    && isNotSortedLevel1Char[cp1 = seq[start + mappedCharPtr + tmpUlong
+                        - 1]] != 0)
                 {
                     rightPtrList[cp1]--;
-                    if (isNotSortedLevel1Char[seq[mappedCharPtr + tmpUlong + 1]] != 0)
+                    if (isNotSortedLevel1Char[seq[start + mappedCharPtr + tmpUlong + 1]] != 0)
                     {
                         int tmpUlongPtr = rightPtrList[cp1];
                         sufPtrMap[tmpUlong - 1] = tmpUlongPtr;
@@ -294,8 +296,8 @@ public class BPR implements ISuffixArrayBuilder
                     }
                     int cp2;
                     if (tmpUlong > 1
-                        && isNotSortedLevel1Char[cp2 = seq[mappedCharPtr + tmpUlong - 2]] != 0
-                        && cp2 != c1)
+                        && isNotSortedLevel1Char[cp2 = seq[start + mappedCharPtr
+                            + tmpUlong - 2]] != 0 && cp2 != c1)
                     {
                         int tmpUlongPtr = --rightPtrList2[cp2 * alphabetSize + cp1];
                         sufPtrMap[tmpUlong - 2] = tmpUlongPtr;
@@ -935,7 +937,7 @@ public class BPR implements ISuffixArrayBuilder
         int i;
         for (i = q - 1; i >= 0; i--)
         {
-            hashCode += seq[mappedUcharArray + i] * tempPower;
+            hashCode += seq[start + mappedUcharArray + i] * tempPower;
             tempPower *= alphabetSize;
         }
         int tempModulo = kbs_power_Ulong(alphabetSize, q - 1);
@@ -944,9 +946,9 @@ public class BPR implements ISuffixArrayBuilder
         for (j = 0; j < strLen - 1; j++)
         {
             sufPtrMap[j] = (buckets[hashCode + 1]) - 1;
-            hashCode -= (seq[mappedUcharArray - q]) * tempModulo;
+            hashCode -= (seq[start + mappedUcharArray - q]) * tempModulo;
             hashCode *= alphabetSize;
-            hashCode += seq[mappedUcharArray];
+            hashCode += seq[start + mappedUcharArray];
             mappedUcharArray++;
         }
         sufPtrMap[j] = buckets[hashCode];
@@ -977,11 +979,11 @@ public class BPR implements ISuffixArrayBuilder
         int [] buckets = new int [numberBuckets + 1];
         for (int i = 0; i < q; i++)
         {
-            seq[length + i] = alphabet.charArray[0];
+            seq[start + length + i] = alphabet.charArray[0];
         }
         for (int i = 0; i < KBS_STRING_EXTENSION_SIZE - q; i++)
         {
-            seq[length + i + q] = 0;
+            seq[start + length + i + q] = 0;
         }
         /* computation of first hashvalue */
         int [] alphaMap = alphabet.alphaMapping;
@@ -991,7 +993,8 @@ public class BPR implements ISuffixArrayBuilder
         int i;
         for (i = q - 1; i >= 0; i--)
         {
-            hashCode += (seq[mappedUcharArray + i] = alphaMap[seq[mappedUcharArray + i]])
+            hashCode += (seq[start + mappedUcharArray + i] = alphaMap[seq[start
+                + mappedUcharArray + i]])
                 * tempPower;
             tempPower *= alphabetSize;
         }
@@ -1003,9 +1006,10 @@ public class BPR implements ISuffixArrayBuilder
         int j;
         for (j = 1; j < strLen; j++)
         {
-            hashCode -= (seq[mappedUcharArray - q]) * tempModulo;
+            hashCode -= (seq[start + mappedUcharArray - q]) * tempModulo;
             hashCode *= alphabetSize;
-            hashCode += seq[mappedUcharArray] = alphaMap[seq[mappedUcharArray]];
+            hashCode += seq[start + mappedUcharArray] = alphaMap[seq[start
+                + mappedUcharArray]];
             mappedUcharArray++;
             buckets[hashCode]++;
         }
@@ -1037,12 +1041,12 @@ public class BPR implements ISuffixArrayBuilder
         {
             int c1;
             buckets[hashCode]--;
-            if ((c1 = charRank[seq[mappedUcharArray - q]]) < charRank[seq[mappedUcharArray
-                + 1 - q]]
-                && c1 <= charRank[seq[mappedUcharArray + 2 - q]]) suffixArray[buckets[hashCode]] = j;
-            hashCode -= (seq[mappedUcharArray - q]) * tempModulo;
+            if ((c1 = charRank[seq[start + mappedUcharArray - q]]) < charRank[seq[start
+                + mappedUcharArray + 1 - q]]
+                && c1 <= charRank[seq[start + mappedUcharArray + 2 - q]]) suffixArray[buckets[hashCode]] = j;
+            hashCode -= (seq[start + mappedUcharArray - q]) * tempModulo;
             hashCode *= alphabetSize;
-            hashCode += seq[mappedUcharArray];
+            hashCode += seq[start + mappedUcharArray];
             mappedUcharArray++;
         }
 
@@ -1080,7 +1084,7 @@ public class BPR implements ISuffixArrayBuilder
         for (j = 0; j < q; j++)
         {
             hashCode = hashCode << exp2;
-            hashCode += seq[mappedUcharArray + j];
+            hashCode += seq[start + mappedUcharArray + j];
         }
         int tempModulo = 0;
         tempModulo = ~tempModulo;
@@ -1092,7 +1096,7 @@ public class BPR implements ISuffixArrayBuilder
             sufPtrMap[j] = (buckets[hashCode + 1]) - 1;
             hashCode = hashCode & tempModulo;
             hashCode = hashCode << exp2;
-            hashCode = hashCode | seq[mappedUcharArray];
+            hashCode = hashCode | seq[start + mappedUcharArray];
             mappedUcharArray++;
         }
         sufPtrMap[j] = buckets[hashCode];
@@ -1148,11 +1152,11 @@ public class BPR implements ISuffixArrayBuilder
         int mappedUcharArray = 0;
         for (int i = 0; i < q; i++)
         {
-            seq[length + i] = alphabet.charArray[0];
+            seq[start + length + i] = alphabet.charArray[0];
         }
         for (int i = length + q; i < length + KBS_STRING_EXTENSION_SIZE - q; i++)
         {
-            seq[i] = 0;
+            seq[start + i] = 0;
         }
         int numberBuckets = kbs_power_Ulong(alphabet.size, q);
         int [] buckets = new int [numberBuckets + 1];
@@ -1160,8 +1164,8 @@ public class BPR implements ISuffixArrayBuilder
         for (int j = 0; j < q; j++)
         {
             hashCode = hashCode << exp2;
-            hashCode += (seq[mappedUcharArray + j] = alphabet.alphaMapping[seq[mappedUcharArray
-                + j]]);
+            hashCode += (seq[start + mappedUcharArray + j] = alphabet.alphaMapping[seq[start
+                + mappedUcharArray + j]]);
         }
         int firstHashCode = hashCode;
 
@@ -1177,7 +1181,8 @@ public class BPR implements ISuffixArrayBuilder
             hashCode = hashCode & tempModulo;
             hashCode = hashCode << exp2;
             hashCode = hashCode
-                | (seq[mappedUcharArray] = alphabet.alphaMapping[seq[mappedUcharArray]]);
+                | (seq[start + mappedUcharArray] = alphabet.alphaMapping[seq[start
+                    + mappedUcharArray]]);
             mappedUcharArray++;
             buckets[hashCode]++;
         }
@@ -1211,12 +1216,12 @@ public class BPR implements ISuffixArrayBuilder
         {
             int c1;
             buckets[hashCode]--;
-            if ((c1 = charRank[seq[mappedUcharArray - q]]) < charRank[seq[mappedUcharArray
-                + 1 - q]]
-                && (c1 <= charRank[seq[mappedUcharArray + 2 - q]])) suffixArray[buckets[hashCode]] = j;
+            if ((c1 = charRank[seq[start + mappedUcharArray - q]]) < charRank[seq[start
+                + mappedUcharArray + 1 - q]]
+                && (c1 <= charRank[seq[start + mappedUcharArray + 2 - q]])) suffixArray[buckets[hashCode]] = j;
             hashCode = hashCode & tempModulo;
             hashCode = hashCode << exp2;
-            hashCode = hashCode | (seq[mappedUcharArray]);
+            hashCode = hashCode | (seq[start + mappedUcharArray]);
 
             mappedUcharArray++;
         }

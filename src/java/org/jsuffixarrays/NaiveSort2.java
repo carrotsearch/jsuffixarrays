@@ -8,8 +8,8 @@ import org.carrot2.util.IndirectSort;
 import com.google.common.collect.PrimitiveArrays;
 
 /**
- * A naive implementation of suffix sorting based on primitive integer
- * collections and custom sorting routines (quicksort).
+ * A naive implementation of suffix sorting based on primitive integer collections and
+ * custom sorting routines (quicksort).
  */
 public final class NaiveSort2 implements ISuffixArrayBuilder
 {
@@ -28,17 +28,19 @@ public final class NaiveSort2 implements ISuffixArrayBuilder
     {
         assertAlways(input != null, "input must not be null");
         assertAlways(input.length >= start + length + 1, "no extra space after input end");
-        assert PrimitiveArrays.asList(input).subList(start, start + length)
-            .indexOf(Integer.MIN_VALUE) < 0 
-            : "Integer.MIN_VALUE must not occur in the input";
+        assert PrimitiveArrays.asList(input).subList(start, start + length).indexOf(
+            Integer.MIN_VALUE) < 0 : "Integer.MIN_VALUE must not occur in the input";
 
         final int saveEOS = input[start + length];
         try
         {
             input[start + length] = Integer.MIN_VALUE;
-            final int [] sa = IndirectSort.sort(
-                start, length, new SuffixComparator(input));
-
+            final int [] sa = IndirectSort.sort(start, length,
+                new SuffixComparator(input));
+            for (int i = 0; i < sa.length; i++)
+            {
+                sa[i] -= start;
+            }
             return sa;
         }
         finally

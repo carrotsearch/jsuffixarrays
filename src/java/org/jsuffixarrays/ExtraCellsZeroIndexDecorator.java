@@ -3,9 +3,9 @@ package org.jsuffixarrays;
 /**
  * A decorator around {@link ISuffixArrayBuilder} that:
  * <ul>
- *  <li>provides extra space after the input for end-of-string markers</li>
- *  <li>shifts the input to zero-based positions.</li>
- * </ul> 
+ * <li>provides extra space after the input for end-of-string markers</li>
+ * <li>shifts the input to zero-based positions.</li>
+ * </ul>
  */
 public final class ExtraCellsZeroIndexDecorator implements ISuffixArrayBuilder
 {
@@ -37,7 +37,6 @@ public final class ExtraCellsZeroIndexDecorator implements ISuffixArrayBuilder
 
         final int [] SA = delegate.buildSuffixArray(shifted, 0, length);
 
-        for (int i = 0; i < length; i++) SA[i] += start;
         return SA;
     }
 }

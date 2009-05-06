@@ -230,12 +230,13 @@
 				args="-server ${memory} @{args}" 
 			/>
 
+			<!--
 			<run-jvm
 				id="sun-1.6-client"
 				jvm="sun-1.6-jvm"
 				stderror="@{stderror}" stdoutput="@{stdoutput}" 
 				args="-client ${memory} @{args}" />
-
+			-->
 			<run-jvm
 				id="harmony-1.5"
 				jvm="harmony-1.5-jvm"

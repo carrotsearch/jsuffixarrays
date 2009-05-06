@@ -14,10 +14,10 @@ import com.google.common.collect.PrimitiveArrays;
  * <p>
  * Note the following important aspects that apply to nearly all methods in this class:
  * <ul>
- *  <li>In nearly all cases, the returned suffix array will not be length-equal to the
- *  input sequence (will be slightly larger). It is so because most alorithms use extra
- *  space for end of sequence delimiters and it makes little sense to temporary 
- *  duplicate memory consumption just to have exact length counts.</li> 
+ * <li>In nearly all cases, the returned suffix array will not be length-equal to the
+ * input sequence (will be slightly larger). It is so because most alorithms use extra
+ * space for end of sequence delimiters and it makes little sense to temporary duplicate
+ * memory consumption just to have exact length counts.</li>
  * </ul>
  */
 public final class SuffixArrays
@@ -28,8 +28,7 @@ public final class SuffixArrays
     }
 
     /**
-     * Create a suffix array for a given character sequence with the default
-     * algorithm.
+     * Create a suffix array for a given character sequence with the default algorithm.
      */
     public static int [] create(CharSequence s)
     {
@@ -44,7 +43,7 @@ public final class SuffixArrays
     {
         return new CharSequenceAdapter(builder).buildSuffixArray(s);
     }
-    
+
     /**
      * Create a suffix array and an LCP array for a given character sequence.
      * 
@@ -56,8 +55,8 @@ public final class SuffixArrays
     }
 
     /**
-     * Create a suffix array and an LCP array for a given character sequence,
-     * use the given algorithm for building the suffix array.
+     * Create a suffix array and an LCP array for a given character sequence, use the
+     * given algorithm for building the suffix array.
      * 
      * @see #computeLCP(int[], int, int, int[])
      */
@@ -65,13 +64,13 @@ public final class SuffixArrays
     {
         final CharSequenceAdapter adapter = new CharSequenceAdapter(builder);
         final int [] sa = adapter.buildSuffixArray(s);
-        final int [] lcp = computeLCP(adapter.input, 0, s.length(), sa); 
+        final int [] lcp = computeLCP(adapter.input, 0, s.length(), sa);
 
         return new SuffixData(sa, lcp);
     }
 
     /**
-     * Create a suffix array and an LCP array for a given input sequence of symbols. 
+     * Create a suffix array and an LCP array for a given input sequence of symbols.
      */
     public static SuffixData createWithLCP(int [] input, int start, int length)
     {
@@ -82,8 +81,8 @@ public final class SuffixArrays
     }
 
     /**
-     * Create a suffix array and an LCP array for a given input sequence of symbols
-     * and a custom suffix array building strategy.
+     * Create a suffix array and an LCP array for a given input sequence of symbols and a
+     * custom suffix array building strategy.
      */
     public static SuffixData createWithLCP(int [] input, int start, int length,
         ISuffixArrayBuilder builder)
@@ -104,11 +103,12 @@ public final class SuffixArrays
      * computation in suffix arrays and its applications. In Proc. 12th Symposium on Combinatorial
      * Pattern Matching (CPM ’01), pages 181–192. Springer-Verlag LNCS n. 2089, 2001.</tt>
      */
-    public static int [] computeLCP(int [] input, 
-        final int start, final int length, int [] sa)
+    public static int [] computeLCP(int [] input, final int start, final int length,
+        int [] sa)
     {
         final int [] rank = new int [length];
-        for (int i = 0; i < length; i++) rank[sa[i] - start] = i;
+        for (int i = 0; i < length; i++)
+            rank[sa[i]] = i;
 
         int h = 0;
         final int [] lcp = new int [length];
@@ -121,8 +121,8 @@ public final class SuffixArrays
             }
             else
             {
-                final int j = sa[k - 1] - start;
-                while (i + h < length && j + h < length 
+                final int j = sa[k - 1];
+                while (i + h < length && j + h < length
                     && input[start + i + h] == input[start + j + h])
                 {
                     h++;
@@ -144,8 +144,7 @@ public final class SuffixArrays
     }
 
     /**
-     * Utility method converting all suffixes of a given sequence to a list of 
-     * strings.
+     * Utility method converting all suffixes of a given sequence to a list of strings.
      */
     public static List<CharSequence> toString(CharSequence input, int [] suffixes)
     {
@@ -159,10 +158,10 @@ public final class SuffixArrays
     }
 
     /**
-     * Utility method converting all suffixes of a given sequence of integers to a list 
-     * of lists of integers.
+     * Utility method converting all suffixes of a given sequence of integers to a list of
+     * lists of integers.
      */
-    public static List<String> toString(int [] input, int start, int length, 
+    public static List<String> toString(int [] input, int start, int length,
         int [] suffixes)
     {
         final List<Integer> full = PrimitiveArrays.asList(input);

@@ -64,7 +64,7 @@ public abstract class SuffixArrayBuilderTestBase
         final ISuffixArrayBuilder builder = getInstance();
 
         final int sliceSize = 500;
-        final int totalSize = 1000;
+        final int totalSize = 1000 + DeepShallow.overshoot;
 
         final Random rnd = new Random(0x11223344);
         final MinMax alphabet = new MinMax(1, 50);
@@ -74,22 +74,15 @@ public abstract class SuffixArrayBuilderTestBase
 
         int [] prevSuffixArray = null;
         int [] prevLCP = null;
-        for (int i = 0; i < totalSize - slice.length - 3; i++)
+        for (int i = 0; i < totalSize - slice.length - DeepShallow.overshoot; i++)
         {
             int [] input = total.clone();
             System.arraycopy(slice, 0, input, i, slice.length);
-            int [] clone = input.clone();
 
+            int [] clone = input.clone();
             int [] sa = builder.buildSuffixArray(input, i, slice.length);
             int [] lcp = SuffixArrays.computeLCP(input, i, slice.length, sa);
-
             Assert.assertArrayEquals(clone, input);
-
-            // Normalize indexes so that they are 0-based between runs.
-            for (int j = 0; j < slice.length; j++)
-            {
-                sa[j] -= i;
-            }
             if (prevSuffixArray != null)
             {
                 Assert.assertArrayEquals(prevSuffixArray, sa);
@@ -211,17 +204,14 @@ public abstract class SuffixArrayBuilderTestBase
      */
     private void assertPermutation(int [] SA, int length)
     {
-        // System.out.println("len " + length);
         final boolean [] seen = new boolean [length];
         for (int i = 0; i < length; i++)
         {
-            // System.out.println(SA[i]);
             Assert.assertFalse(seen[SA[i]]);
             seen[SA[i]] = true;
         }
         for (int i = 0; i < length; i++)
         {
-            // System.out.println("checking " + i);
             Assert.assertTrue(seen[i]);
         }
     }

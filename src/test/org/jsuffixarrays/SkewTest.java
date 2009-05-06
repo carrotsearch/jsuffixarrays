@@ -11,7 +11,6 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -20,10 +19,10 @@ import org.junit.Test;
 public class SkewTest extends SuffixArrayBuilderTestBase
 {
     @Before
-    public void setupForConstraints() 
+    public void setupForConstraints()
     {
         smallAlphabet = new MinMax(1, 10);
-        largeAlphabet = new MinMax(1, 1000);        
+        largeAlphabet = new MinMax(1, 1000);
     }
 
     /*
@@ -50,21 +49,11 @@ public class SkewTest extends SuffixArrayBuilderTestBase
         t.main(5, 5);
 
         // Compare outputs, line by line.
-        List<String> is = (List<String>) 
-            IOUtils.readLines(new StringReader(sw.toString()));
-        List<String> expected = (List<String>)
-            IOUtils.readLines(getClass().getResourceAsStream("KarkkainenSanders.result-5-5"));
+        List<String> is = IOUtils.readLines(new StringReader(sw.toString()));
+        List<String> expected = IOUtils.readLines(getClass().getResourceAsStream(
+            "KarkkainenSanders.result-5-5"));
 
         assertEquals(expected, is);
-    }
-
-    /*
-     * 
-     */
-    @Override @Ignore
-    public void sameResultWithArraySlice()
-    {
-        // Ignore this test, Karkkainnen and Sanders require start == 0
     }
 
     /**
@@ -146,7 +135,7 @@ public class SkewTest extends SuffixArrayBuilderTestBase
                 cout.write(Integer.toString(n));
                 cout.write("\n");
 
-                int N = (int) (Math.pow((double) b, n) + 0.5);
+                int N = (int) (Math.pow(b, n) + 0.5);
                 int [] s = new int [n + 3];
                 int [] SA = new int [n + 3];
 
@@ -157,7 +146,7 @@ public class SkewTest extends SuffixArrayBuilderTestBase
                 for (int j = 0; j < N; j++)
                 {
                     printV(s, n, "s");
-                    Skew.suffixArray(s, SA, n, b);
+                    Skew.suffixArray(s, SA, n, b, 0);
                     Assert.assertTrue(s[n] == 0);
                     Assert.assertTrue(s[n + 1] == 0);
                     Assert.assertTrue(SA[n] == 0);
@@ -174,5 +163,5 @@ public class SkewTest extends SuffixArrayBuilderTestBase
                 }
             }
         }
-    }    
+    }
 }
