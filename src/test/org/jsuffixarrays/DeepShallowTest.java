@@ -1,7 +1,6 @@
 package org.jsuffixarrays;
 
 import org.junit.Before;
-import org.junit.Ignore;
 
 /**
  * Tests for {@link DivSufSort}.
@@ -26,11 +25,11 @@ public class DeepShallowTest extends SuffixArrayBuilderTestBase
 
     }
 
-    @Override
-    @Ignore
-    public void sameResultWithArraySlice()
-    {
-        // Ignore this test, DivSufSort require start == 0
-    }
+    // @Override
+    // @Ignore
+    // public void sameResultWithArraySlice()
+    // {
+    // // Ignore this test, DivSufSort require start == 0
+    // }
 
 }

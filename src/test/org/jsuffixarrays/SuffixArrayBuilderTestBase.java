@@ -142,8 +142,7 @@ public abstract class SuffixArrayBuilderTestBase
         final int extraSpace = SuffixArrays.MAX_EXTRA_TRAILING_SPACE;
         for (int i = 0; i < repeats; i++)
         {
-            final int [] input = generateRandom(rnd, 
-                inputSize + extraSpace, alphabet);
+            final int [] input = generateRandom(rnd, inputSize + extraSpace, alphabet);
             final int [] copy = input.clone();
 
             final int start = 0;

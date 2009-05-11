@@ -31,7 +31,7 @@ public final class SuffixArrays
     /**
      * Maximum required trailing space in the input array (certain algorithms need it). 
      */
-    final static int MAX_EXTRA_TRAILING_SPACE = DeepShallow.overshoot; 
+    final static int MAX_EXTRA_TRAILING_SPACE = DeepShallow.OVERSHOOT; 
 
     /*
      * 

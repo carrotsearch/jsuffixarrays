@@ -4,36 +4,6 @@ import static org.jsuffixarrays.Tools.assertAlways;
 
 import java.util.Arrays;
 
-//TODO: investigate strange behaviour when start != 0 in DeepShallow
-/*
- * [MN]
- * how to recreate this strange behaviour:
- * 1. use System.arraycopy to create Text array (size = length + overshoot, 
- * copy input from start) __OR__ replace all occurences of Text[ with Text[start + 
- * 2. delete code from DeepShallowTest that ignores sameResultWithArraySlice()
- * 3. make sure that line Tools.assertAlways(start == 0, "start index is not zero"); in buildSuffixArray is uncommented
- * 4. run tests -- only sameResultWithArraySlice() should fail
- * 5. comment or delete Tools.assertAlways(start == 0, "start index is not zero");
- * 6. run test -- sameResultWithArraySlice() will pass, but both tests on random input will fail
- * ???
- * 
- * I tried reseting all fields of this class at the start of buildSuffixArray, but it didn't help.
- */
-
-/*
- * [DW]
- * I don't see how this algorithm (or rather implementation) can work for start != 0 
- * -- everything seems to require that
- * start == 0, for example this: 
- * 
- * for (int i = length; i < length + overshoot; i++)
- * {
- *    Text[i] = 0;
- * }
- *
- * will cause invalid indexes to be cleared in the original array.
- */
-
 /**
  * <p>
  * Straightforward reimplementation of deep-shallow algorithm given in: <tt>
@@ -46,6 +16,7 @@ import java.util.Arrays;
  * The implementation of this algorithm makes some assumptions about the input. See
  * {@link #buildSuffixArray(int[], int, int)} for details.
  */
+// TODO: javadoc for Deep Shallow and its methods needs to be updated
 public class DeepShallow implements ISuffixArrayBuilder
 {
     private static class SplitGroupResult
@@ -64,12 +35,13 @@ public class DeepShallow implements ISuffixArrayBuilder
     {
         int skip;
         int key;
+        Node right;
+        // original author uses down as a pointer to another Node, but sometimes he stores
+        // int values in it. Because of that, we have two following variables (luckily we
+        // could do so :)).
         Node down;
         int downInt;
-        Node right;
     }
-
-    // TODO: We should comply with Java naming conventions (refactoring of constants and fields is needed).
 
     /**
      * TODO: What is this magic constant? Do not make it public and do not reuse it
@@ -77,43 +49,65 @@ public class DeepShallow implements ISuffixArrayBuilder
      * special considerations, we can run algorithm-specific tests with an appropriate
      * decorator.
      */
-    final static int overshoot = 575;
-
+    final static int OVERSHOOT = 575;
     private final static int SETMASK = 1 << 30;
     private final static int CLEARMASK = ~SETMASK;
-    private final static int Mk_qs_thresh = 20;
-    private final static int Max_thresh = 30;
-    private final static int Shallow_limit = 550; // limit for shallow_sort
-    private final static int Cmp_overshoot = 16;
     private final static int MARKER = 1 << 31;
-    private final static int Max_pseudo_anchor_offset = 0;
-    private final static int B2g_ratio = 1000;
-    private final static int Update_anchor_ranks = 0;
-    private final static int Blind_sort_ratio = 2000;
-    private static final int STACK_SIZE = 100;
 
-    private int [] Text;
-    private int Text_size;
-    private int [] Sa;
-    private int Anchor_dist; // distance between anchors
-    private int Anchor_num;
-    private int [] Anchor_offset;
-    private int [] Anchor_rank;
+    /**
+     * recursion limit for mk quicksort:
+     */
+    private final static int MK_QS_TRESH = 20;
+
+    private final static int MAX_TRESH = 30;
+
+    /**
+     * limit for shallow_sort
+     */
+    private final static int SHALLOW_LIMIT = 550;
+
+    /**
+     * maximum offset considered when searching a pseudo anchor
+     */
+    private final static int MAX_PSEUDO_ANCHOR_OFFSET = 0;
+
+    /**
+     * maximum ratio bucket_size/group_size accepted for pseudo anchor_sorting
+     */
+    private final static int B2G_RATIO = 1000;
+
+    /**
+     * if!=0 update anchor ranks when determining rank for pseudo-sorting
+     */
+    private final static int UPDATE_ANCHOR_RANKS = 0;
+
+    /**
+     * blind sort is used for groups of size &le; Text_size/Blind_sort_ratio
+     */
+    private final static int BLIND_SORT_RATIO = 2000;
+
+    private final static int STACK_SIZE = 100;
+
+    private int [] text;
+    private int textSize;
+    private int [] suffixArray;
+    private int anchorDist; // distance between anchors
+    private int anchorNum;
+    private int [] anchorOffset;
+    private int [] anchorRank;
     private final int [] ftab = new int [66049];
-    private final int [] bucket_ranked = new int [66049];
+    private final int [] bucketRanked = new int [66049];
     private final int [] runningOrder = new int [257];
-    private final int [] lcp_aux = new int [1 + Max_thresh];
+    private final int [] lcpAux = new int [1 + MAX_TRESH];
     private int lcp;
-    private int Cmp_left;
-    private int Cmp_done;
-
-    private int Aux;
-    private int Aux_written;
-    private int Stack_size;
-
-    private Node [] Stack;
-
+    private int cmpLeft;
+    private int cmpDone;
+    private int aux;
+    private int auxWritten;
+    private int stackSize;
+    private Node [] stack;
     private final boolean preserveInput;
+    private int start;
 
     public DeepShallow()
     {
@@ -133,7 +127,7 @@ public class DeepShallow implements ISuffixArrayBuilder
      * <li>non-negative (&ge;0) symbols in the input</li>
      * <li>maximal symbol value &lt; <code>256</code></li>
      * <li><code>input.length</code> &gt;=
-     * <code>start + length + {@link #overshoot}</code></li>
+     * <code>start + length + {@link #OVERSHOOT}</code></li>
      * <li>length >= 2</li>
      * <li>start == 0</li>
      * </ul>
@@ -141,36 +135,43 @@ public class DeepShallow implements ISuffixArrayBuilder
     @Override
     public int [] buildSuffixArray(int [] input, int start, int length)
     {
+        // TODO: commenting this line will cause tests on random input to fail
         Tools.assertAlways(start == 0, "start index is not zero");
 
-        // TODO: add assertion comments here.
-        Tools.assertAlways(overshoot == Shallow_limit + Cmp_overshoot + 9, "");
-        Tools.assertAlways(input.length >= start + length + overshoot, 
-            "Input array length must have a trailing space of at least " 
-            + overshoot + " bytes.");
+        // [MN] this assertion isn't really necessay here - it checks value of constants,
+        // and I think it makes little sense to check them everytime
+        // Tools.assertAlways(OVERSHOOT == SHALLOW_LIMIT + CMP_OVERSHOOT + 9, "");
+
+        Tools.assertAlways(input.length >= start + length, "Input array is too short");
 
         MinMax mm = Tools.minmax(input, start, length);
         assertAlways(mm.min >= 0, "input must not be negative");
         assertAlways(mm.max < 256, "max alphabet size is 256");
 
         lcp = 1;
-        Stack = new Node [length];
+        stack = new Node [length];
+        this.start = start;
         if (preserveInput)
         {
-            Text = input.clone();
+            this.start = 0;
+            text = new int [length + OVERSHOOT];
+            System.arraycopy(input, start, text, 0, length);
         }
         else
         {
-            Text = input;
+            Tools.assertAlways(input.length >= start + length + OVERSHOOT,
+                "Input array length must have a trailing space of at least " + OVERSHOOT
+                    + " bytes.");
+            text = input;
         }
 
-        for (int i = length; i < length + overshoot; i++)
+        for (int i = length; i < length + OVERSHOOT; i++)
         {
-            Text[i] = 0;
+            text[this.start + i] = 0;
         }
 
-        Text_size = length;
-        Sa = new int [length];
+        textSize = length;
+        suffixArray = new int [length];
 
         int i, j, ss, sb, k, c1, c2, numQSorted = 0;
         boolean [] bigDone = new boolean [257];
@@ -178,29 +179,31 @@ public class DeepShallow implements ISuffixArrayBuilder
         int [] copyEnd = new int [257];
 
         // ------ init array containing positions of anchors
-        if (Anchor_dist == 0)
+        if (anchorDist == 0)
         {
-            Anchor_num = 0;
+            anchorNum = 0;
         }
         else
         {
-            Anchor_num = 2 + (length - 1) / Anchor_dist; // see comment for helped_sort()
-            Anchor_rank = new int [Anchor_num];
-            Anchor_offset = new int [Anchor_num];
-            for (i = 0; i < Anchor_num; i++)
+            anchorNum = 2 + (length - 1) / anchorDist; // see comment for helped_sort()
+            anchorRank = new int [anchorNum];
+            anchorOffset = new int [anchorNum];
+            for (i = 0; i < anchorNum; i++)
             {
-                Anchor_rank[i] = -1; // pos of anchors is initially unknown
-                Anchor_offset[i] = Anchor_dist; // maximum possible value
+                anchorRank[i] = -1; // pos of anchors is initially unknown
+                anchorOffset[i] = anchorDist; // maximum possible value
             }
         }
 
         // ---------- init ftab ------------------
+        // at first, clear values in ftab
         for (i = 0; i < 66049; i++)
             ftab[i] = 0;
-        c1 = Text[0];
-        for (i = 1; i <= Text_size; i++)
+
+        c1 = text[this.start + 0];
+        for (i = 1; i <= textSize; i++)
         {
-            c2 = Text[i];
+            c2 = text[this.start + i];
             ftab[(c1 << 8) + c2]++;
             c1 = c2;
         }
@@ -208,14 +211,14 @@ public class DeepShallow implements ISuffixArrayBuilder
             ftab[i] += ftab[i - 1];
 
         // -------- sort suffixes considering only the first two chars
-        c1 = Text[0];
-        for (i = 0; i < Text_size; i++)
+        c1 = text[this.start + 0];
+        for (i = 0; i < textSize; i++)
         {
-            c2 = Text[i + 1];
+            c2 = text[this.start + i + 1];
             j = (c1 << 8) + c2;
             c1 = c2;
             ftab[j]--;
-            Sa[ftab[j]] = i;
+            suffixArray[ftab[j]] = i;
         }
 
         /* decide on the running order */
@@ -264,26 +267,26 @@ public class DeepShallow implements ISuffixArrayBuilder
                     copyStart[j] = ftab[(j << 8) + ss] & CLEARMASK;
                     copyEnd[j] = (ftab[(j << 8) + ss + 1] & CLEARMASK) - 1;
                 }
-                // take care of the virtual -1 char in position Text_size+1
+                // take care of the virtual -1 char in position textSize+1
                 if (ss == 0)
                 {
-                    k = Text_size - 1;
-                    c1 = Text[k];
-                    if (!bigDone[c1]) Sa[copyStart[c1]++] = k;
+                    k = textSize - 1;
+                    c1 = text[this.start + k];
+                    if (!bigDone[c1]) suffixArray[copyStart[c1]++] = k;
                 }
                 for (j = ftab[ss << 8] & CLEARMASK; j < copyStart[ss]; j++)
                 {
-                    k = Sa[j] - 1;
+                    k = suffixArray[j] - 1;
                     if (k < 0) continue;
-                    c1 = Text[k];
-                    if (!bigDone[c1]) Sa[copyStart[c1]++] = k;
+                    c1 = text[this.start + k];
+                    if (!bigDone[c1]) suffixArray[copyStart[c1]++] = k;
                 }
                 for (j = (ftab[(ss + 1) << 8] & CLEARMASK) - 1; j > copyEnd[ss]; j--)
                 {
-                    k = Sa[j] - 1;
+                    k = suffixArray[j] - 1;
                     if (k < 0) continue;
-                    c1 = Text[k];
-                    if (!bigDone[c1]) Sa[copyEnd[c1]--] = k;
+                    c1 = text[this.start + k];
+                    if (!bigDone[c1]) suffixArray[copyEnd[c1]--] = k;
                 }
             }
             for (j = 0; j <= 256; j++)
@@ -291,7 +294,7 @@ public class DeepShallow implements ISuffixArrayBuilder
             bigDone[ss] = true;
         }// endfor
 
-        return Sa;
+        return suffixArray;
     }
 
     private void shallow_sort(int a, int n)
@@ -312,7 +315,7 @@ public class DeepShallow implements ISuffixArrayBuilder
         boolean repeatFlag = true;
 
         // ---- On small arrays use insertions sort
-        if (n < Mk_qs_thresh)
+        if (n < MK_QS_TRESH)
         {
             shallow_inssort_lcp(a, n, text_depth);
             return;
@@ -367,7 +370,7 @@ public class DeepShallow implements ISuffixArrayBuilder
             if (pa > pd)
             {
                 // all values were equal to partval: make it simpler
-                if ((next_depth = text_depth + 4) >= Shallow_limit)
+                if ((next_depth = text_depth + 4) >= SHALLOW_LIMIT)
                 {
                     helped_sort(a, n, next_depth);
                     return;
@@ -389,7 +392,7 @@ public class DeepShallow implements ISuffixArrayBuilder
         // --- sort smaller strings -------
         if ((r = pb - pa) > 1) shallow_mkq32(a, r, text_depth);
         // --- sort strings starting with partval -----
-        if ((next_depth = text_depth + 4) < Shallow_limit) shallow_mkq32(a + r, pa - pd
+        if ((next_depth = text_depth + 4) < SHALLOW_LIMIT) shallow_mkq32(a + r, pa - pd
             + n - 1, next_depth);
         else helped_sort(a + r, pa - pd + n - 1, next_depth);
         if ((r = pd - pc) > 1) shallow_mkq32(a + n - r, r, text_depth);
@@ -400,9 +403,9 @@ public class DeepShallow implements ISuffixArrayBuilder
     {
         while (n-- > 0)
         {
-            int t = Sa[a];
-            Sa[a++] = Sa[b];
-            Sa[b++] = t;
+            int t = suffixArray[a];
+            suffixArray[a++] = suffixArray[b];
+            suffixArray[b++] = t;
         }
     }
 
@@ -415,7 +418,7 @@ public class DeepShallow implements ISuffixArrayBuilder
      * this is the insertion sort routine called by multikey-quicksort for sorting small
      * groups. During insertion sort the comparisons are done calling
      * cmp_unrolled_shallow_lcp() and two strings are equal if the coincides for
-     * Shallow_limit characters. After this first phase we sort groups of "equal_string"
+     * SHALLOW_LIMIT characters. After this first phase we sort groups of "equal_string"
      * using helped_sort(). Usage of lcp. For i=1,...n-1 let lcp[i] denote the lcp between
      * a[i] and a[i+1]. assume a[0] ... a[j-1] are already ordered and that we want to
      * insert a new element ai. If suf(ai) >= suf(a[j-1]) we are done. If
@@ -439,17 +442,17 @@ public class DeepShallow implements ISuffixArrayBuilder
         int text_depth_ai;// pointer
         // --------- initialize ----------------
 
-        lcp_aux[0] = -1; // set lcp[-1] = -1
+        lcpAux[0] = -1; // set lcp[-1] = -1
         for (i = 0; i < n; i++)
         {
-            lcp_aux[lcp + i] = 0;
+            lcpAux[lcp + i] = 0;
         }
-        cmp_from_limit = Shallow_limit - text_depth;
+        cmp_from_limit = SHALLOW_LIMIT - text_depth;
 
         // ----- start insertion sort -----------
         for (i = 1; i < n; i++)
         {
-            ai = Sa[a + i];
+            ai = suffixArray[a + i];
             lcpi = 0;
             text_depth_ai = ai + text_depth;
             j = i;
@@ -458,15 +461,15 @@ public class DeepShallow implements ISuffixArrayBuilder
             {
 
                 // ------ compare ai with a[j-1] --------
-                Cmp_left = cmp_from_limit - lcpi;
-                r = cmp_unrolled_shallow_lcp(lcpi + Sa[a + j1] + text_depth, lcpi
-                    + text_depth_ai);
-                lcp_new = cmp_from_limit - Cmp_left; // lcp between ai and a[j1]
+                cmpLeft = cmp_from_limit - lcpi;
+                r = cmp_unrolled_shallow_lcp(lcpi + suffixArray[a + j1] + text_depth,
+                    lcpi + text_depth_ai);
+                lcp_new = cmp_from_limit - cmpLeft; // lcp between ai and a[j1]
                 assert (r != 0 || lcp_new >= cmp_from_limit);
 
                 if (r <= 0)
                 { // we have a[j-1] <= ai
-                    lcp_aux[lcp + j1] = lcp_new; // ai will be written in a[j]; update
+                    lcpAux[lcp + j1] = lcp_new; // ai will be written in a[j]; update
                     // lcp[j-1]
                     break;
                 }
@@ -476,36 +479,36 @@ public class DeepShallow implements ISuffixArrayBuilder
                 lcpi = lcp_new;
                 do
                 {
-                    Sa[a + j] = Sa[a + j1]; // move down a[j-1]
-                    lcp_aux[lcp + j] = lcp_aux[lcp + j1]; // move down lcp[j-1]
+                    suffixArray[a + j] = suffixArray[a + j1]; // move down a[j-1]
+                    lcpAux[lcp + j] = lcpAux[lcp + j1]; // move down lcp[j-1]
                     j = j1;
                     j1--; // update j and j1=j-1
                 }
-                while (lcpi < lcp_aux[lcp + j1]); // recall that lcp[-1]=-1
+                while (lcpi < lcpAux[lcp + j1]); // recall that lcp[-1]=-1
 
-                if (lcpi > lcp_aux[lcp + j1]) break; // ai will be written in position j
+                if (lcpi > lcpAux[lcp + j1]) break; // ai will be written in position j
 
                 // if we get here lcpi==lcp[j1]: we will compare them at next iteration
 
             } // end for(j=i ...
-            Sa[a + j] = ai;
-            lcp_aux[lcp + j] = lcpi;
+            suffixArray[a + j] = ai;
+            lcpAux[lcp + j] = lcpi;
         } // end for(i=1 ...
         // ----- done with insertion sort. now sort groups of equal strings
         for (i = 0; i < n - 1; i = j + 1)
         {
             for (j = i; j < n; j++)
-                if (lcp_aux[lcp + j] < cmp_from_limit) break;
-            if (j - i > 0) helped_sort(a + i, j - i + 1, Shallow_limit);
+                if (lcpAux[lcp + j] < cmp_from_limit) break;
+            if (j - i > 0) helped_sort(a + i, j - i + 1, SHALLOW_LIMIT);
         }
     }
 
     /**
      * Function to compare two strings originating from the *b1 and *b2 The size of the
-     * unrolled loop must be at most equal to the costant Cmp_overshoot defined in
-     * common.h When the function is called Cmp_left must contain the maximum number of
-     * comparisons the algorithm can do before returning 0 (equal strings) At exit
-     * Cmp_left has been decreased by the # of comparisons done
+     * unrolled loop must be at most equal to the costant CMP_OVERSHOOT defined in
+     * common.h When the function is called cmpLeft must contain the maximum number of
+     * comparisons the algorithm can do before returning 0 (equal strings) At exit cmpLeft
+     * has been decreased by the # of comparisons done
      */
     private int cmp_unrolled_shallow_lcp(int b1, int b2)
     {
@@ -517,8 +520,8 @@ public class DeepShallow implements ISuffixArrayBuilder
         do
         {
             // 1
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 return c1 - c2;
@@ -526,158 +529,158 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 2
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 1;
+                cmpLeft -= 1;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 3
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 2;
+                cmpLeft -= 2;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 4
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 3;
+                cmpLeft -= 3;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 5
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 4;
+                cmpLeft -= 4;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 6
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 5;
+                cmpLeft -= 5;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 7
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 6;
+                cmpLeft -= 6;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 8
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 7;
+                cmpLeft -= 7;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 9
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 8;
+                cmpLeft -= 8;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 10
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 9;
+                cmpLeft -= 9;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 11
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 10;
+                cmpLeft -= 10;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 12
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 11;
+                cmpLeft -= 11;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 13
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 12;
+                cmpLeft -= 12;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 14
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 13;
+                cmpLeft -= 13;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 15
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 14;
+                cmpLeft -= 14;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // 16
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_left -= 15;
+                cmpLeft -= 15;
                 return c1 - c2;
             }
             b1++;
             b2++;
             // if we have done enough comparisons the strings are considered equal
-            Cmp_left -= 16;
-            if (Cmp_left <= 0) return 0;
+            cmpLeft -= 16;
+            if (cmpLeft <= 0) return 0;
             // assert( b1<Upper_text_limit && b2<Upper_text_limit);
         }
         while (true);
@@ -690,10 +693,10 @@ public class DeepShallow implements ISuffixArrayBuilder
      * parameter depth is the number of chars that a[0] ... a[n-1] are known to have in
      * common (thus a direct comparison among a[i] and a[j] should start from position
      * depth) Note that a[] is a subsection of the sa therefore a[0] ... a[n-1] are
-     * starting position of suffixes For every a[i] we look at the anchor a[i]/Anchor_dist
-     * and the one after that. This justifies the definition of Anchor_num (the size of
-     * Anchor_ofset[] and Anchor_rank[] defined in ds_sort()) as Anchor_num = 2 +
-     * (n-1)/Anchor_dist
+     * starting position of suffixes For every a[i] we look at the anchor a[i]/anchorDist
+     * and the one after that. This justifies the definition of anchorNum (the size of
+     * Anchor_ofset[] and anchorRank[] defined in ds_sort()) as anchorNum = 2 +
+     * (n-1)/anchorDist
      */
     private void helped_sort(int a, int n, int depth)
     {
@@ -706,14 +709,14 @@ public class DeepShallow implements ISuffixArrayBuilder
         if (n == 1) return; // simplest case: only one string
 
         // if there are no anchors use pseudo-anchors or deep_sort
-        if (Anchor_dist == 0)
+        if (anchorDist == 0)
         {
             pseudo_or_deep_sort(a, n, depth);
             return;
         }
 
         // compute the current bucket
-        curr_sb = Get_small_bucket(Sa[a]);
+        curr_sb = Get_small_bucket(suffixArray[a]);
 
         // init best anchor variables with illegal values
         min_forw_offset = min_forw_offset_buc = Integer.MAX_VALUE;
@@ -724,12 +727,12 @@ public class DeepShallow implements ISuffixArrayBuilder
         // look at the anchor preceeding each a[i]
         for (i = 0; i < n; i++)
         {
-            text_pos = Sa[a + i];
+            text_pos = suffixArray[a + i];
             // get anchor preceeding text_pos=a[i]
-            anchor = text_pos / Anchor_dist;
-            toffset = text_pos % Anchor_dist; // distance of a[i] from anchor
-            aoffset = Anchor_offset[anchor]; // distance of sorted suf from anchor
-            if (aoffset < Anchor_dist)
+            anchor = text_pos / anchorDist;
+            toffset = text_pos % anchorDist; // distance of a[i] from anchor
+            aoffset = anchorOffset[anchor]; // distance of sorted suf from anchor
+            if (aoffset < anchorDist)
             { // check if it is a "sorted" anchor
                 diff = aoffset - toffset;
                 if (diff > 0)
@@ -762,10 +765,10 @@ public class DeepShallow implements ISuffixArrayBuilder
                         back_anchor_index = i;
                     }
                     // try to find a sorted suffix > a[i] by looking at next anchor
-                    aoffset = Anchor_offset[++anchor];
-                    if (aoffset < Anchor_dist)
+                    aoffset = anchorOffset[++anchor];
+                    if (aoffset < anchorDist)
                     {
-                        diff = Anchor_dist + aoffset - toffset;
+                        diff = anchorDist + aoffset - toffset;
                         assert (diff > 0);
                         if (curr_sb != Get_small_bucket(text_pos + diff))
                         {
@@ -793,10 +796,10 @@ public class DeepShallow implements ISuffixArrayBuilder
         // ------ if forward anchor_sort is possible, do it! --------
         if (best_forw_anchor >= 0 && min_forw_offset < depth - 1)
         {
-            anchor_pos = Sa[a + forw_anchor_index] + min_forw_offset;
-            anchor_rank = Anchor_rank[best_forw_anchor];
+            anchor_pos = suffixArray[a + forw_anchor_index] + min_forw_offset;
+            anchor_rank = anchorRank[best_forw_anchor];
             general_anchor_sort(a, n, anchor_pos, anchor_rank, min_forw_offset);
-            if (Anchor_dist > 0) update_anchors(a, n);
+            if (anchorDist > 0) update_anchors(a, n);
             return;
         }
 
@@ -809,25 +812,25 @@ public class DeepShallow implements ISuffixArrayBuilder
             // make sure that the offset is legal for all a[i]
             for (i = 0; i < n; i++)
             {
-                if (Sa[a + i] + max_back_offset < 0) fail = true;
+                if (suffixArray[a + i] + max_back_offset < 0) fail = true;
                 // goto fail; // illegal offset, give up
             }
             // make sure that a[0] .. a[n-1] are preceded by the same substring
-            T0 = Sa[a];
+            T0 = suffixArray[a];
             for (i = 1; i < n; i++)
             {
-                Ti = Sa[a + i];
+                Ti = suffixArray[a + i];
                 for (j = max_back_offset; j <= -1; j++)
-                    if (Text[T0 + j] != Text[Ti + j]) fail = true;
+                    if (text[this.start + T0 + j] != text[this.start + Ti + j]) fail = true;
                 // goto fail; // mismatch, give up
             }
             if (!fail)
             {
                 // backward anchor sorting is possible
-                anchor_pos = Sa[a + back_anchor_index] + max_back_offset;
-                anchor_rank = Anchor_rank[best_back_anchor];
+                anchor_pos = suffixArray[a + back_anchor_index] + max_back_offset;
+                anchor_rank = anchorRank[best_back_anchor];
                 general_anchor_sort(a, n, anchor_pos, anchor_rank, max_back_offset);
-                if (Anchor_dist > 0) update_anchors(a, n);
+                if (anchorDist > 0) update_anchors(a, n);
                 return;
             }
         }
@@ -837,8 +840,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             {
                 int equal = 0, lower = 0, upper = 0;
 
-                anchor_pos = Sa[a + forw_anchor_index_buc] + min_forw_offset_buc;
-                anchor_rank = Anchor_rank[best_forw_anchor_buc];
+                anchor_pos = suffixArray[a + forw_anchor_index_buc] + min_forw_offset_buc;
+                anchor_rank = anchorRank[best_forw_anchor_buc];
 
                 // establish how many suffixes can be sorted using anchor_sort()
                 SplitGroupResult res = split_group(a, n, depth, min_forw_offset_buc,
@@ -863,7 +866,7 @@ public class DeepShallow implements ISuffixArrayBuilder
                     if (lower > 1) pseudo_or_deep_sort(a, lower, depth);
                     if (upper > 1) pseudo_or_deep_sort(a + lower + equal, upper, depth);
                 } // end if(equal==n) ... else
-                if (Anchor_dist > 0) update_anchors(a, n);
+                if (anchorDist > 0) update_anchors(a, n);
                 return;
             } // end hard case
 
@@ -898,7 +901,7 @@ public class DeepShallow implements ISuffixArrayBuilder
         int text_depth, text_limit;// pointers
 
         // --------- initialization ------------------------------------
-        pivot_pos = Sa[a + pivot]; // starting position in T[] of pivot
+        pivot_pos = suffixArray[a + pivot]; // starting position in T[] of pivot
         text_depth = depth;
         text_limit = text_depth + offset;
 
@@ -913,9 +916,9 @@ public class DeepShallow implements ISuffixArrayBuilder
 
         for (; pa != pd && (text_depth < text_limit); text_depth++)
         {
-            // ------ the pivot char is Text[pivot_pos+depth] where
-            // depth = text_depth-Text. This is text_depth[pivot_pos]
-            partval = Text[text_depth + pivot_pos];
+            // ------ the pivot char is text[this.start + pivot_pos+depth] where
+            // depth = text_depth-text. This is text_depth[pivot_pos]
+            partval = text[this.start + text_depth + pivot_pos];
             // ----- partition ------------
             pb = pa_old = pa;
             pc = pd_old = pd;
@@ -961,8 +964,8 @@ public class DeepShallow implements ISuffixArrayBuilder
     }
 
     /**
-     * given a SORTED array of suffixes a[0] .. a[n-1] updates Anchor_rank[] and
-     * Anchor_offset[]
+     * given a SORTED array of suffixes a[0] .. a[n-1] updates anchorRank[] and
+     * anchorOffset[]
      */
     private void update_anchors(int a, int n)
     {
@@ -970,15 +973,15 @@ public class DeepShallow implements ISuffixArrayBuilder
 
         for (i = 0; i < n; i++)
         {
-            text_pos = Sa[a + i];
+            text_pos = suffixArray[a + i];
             // get anchor preceeding text_pos=a[i]
-            anchor = text_pos / Anchor_dist;
-            toffset = text_pos % Anchor_dist; // distance of a[i] from anchor
-            aoffset = Anchor_offset[anchor]; // dist of sorted suf from anchor
+            anchor = text_pos / anchorDist;
+            toffset = text_pos % anchorDist; // distance of a[i] from anchor
+            aoffset = anchorOffset[anchor]; // dist of sorted suf from anchor
             if (toffset < aoffset)
             {
-                Anchor_offset[anchor] = toffset;
-                Anchor_rank[anchor] = a + i;
+                anchorOffset[anchor] = toffset;
+                anchorRank[anchor] = a + i;
             }
         }
 
@@ -989,7 +992,7 @@ public class DeepShallow implements ISuffixArrayBuilder
      * after offset characters, there is a suffix whose rank is known. In this routine we
      * call this suffix anchor (and we denote its position and rank with anchor_pos and
      * anchor_rank respectively) but it is not necessarily an anchor (=does not
-     * necessarily starts at position multiple of Anchor_dist) since this function is
+     * necessarily starts at position multiple of anchorDist) since this function is
      * called by pseudo_anchor_sort(). The routine works by scanning the suffixes before
      * and after the anchor in order to find (and mark) those which are suffixes of a[0]
      * ... a[n-1]. After that, the ordering of a[0] ... a[n-1] is derived with a sigle
@@ -1011,7 +1014,7 @@ public class DeepShallow implements ISuffixArrayBuilder
         hi = BUCKET_LAST(sb);
         // ------ sort pointers a[0] ... a[n-1] as plain integers
         // qsort(a, n, sizeof(Int32), integer_cmp);
-        Arrays.sort(Sa, a, a + n);
+        Arrays.sort(suffixArray, a, a + n);
 
         // ------------------------------------------------------------------
         // now we scan the bucket containing the anchor in search of suffixes
@@ -1028,8 +1031,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             assert (curr_lo > lo || curr_hi < hi);
             while (curr_lo > lo)
             {
-                item = Sa[--curr_lo] - offset;
-                ris = Arrays.binarySearch(Sa, a, a + n, item);
+                item = suffixArray[--curr_lo] - offset;
+                ris = Arrays.binarySearch(suffixArray, a, a + n, item);
                 // ris = bsearch(&item,a,n,sizeof(Int32), integer_cmp);
                 if (ris != 0)
                 {
@@ -1040,8 +1043,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             }
             while (curr_hi < hi)
             {
-                item = Sa[++curr_hi] - offset;
-                ris = Arrays.binarySearch(Sa, a, a + n, item);
+                item = suffixArray[++curr_hi] - offset;
+                ris = Arrays.binarySearch(suffixArray, a, a + n, item);
                 if (ris != 0)
                 {
                     MARK(curr_hi);
@@ -1055,7 +1058,7 @@ public class DeepShallow implements ISuffixArrayBuilder
             if (ISMARKED(i))
             {
                 UNMARK(i);
-                Sa[a + j++] = Sa[i] - offset;
+                suffixArray[a + j++] = suffixArray[i] - offset;
             }
 
     }
@@ -1065,7 +1068,7 @@ public class DeepShallow implements ISuffixArrayBuilder
      */
     private void UNMARK(int i)
     {
-        Sa[i] &= ~MARKER;
+        suffixArray[i] &= ~MARKER;
 
     }
 
@@ -1074,14 +1077,14 @@ public class DeepShallow implements ISuffixArrayBuilder
      */
     private boolean ISMARKED(int i)
     {
-        return (Sa[i] & MARKER) != 0;
+        return (suffixArray[i] & MARKER) != 0;
     }
 
     /**
      */
     private void MARK(int i)
     {
-        Sa[i] |= MARKER;
+        suffixArray[i] |= MARKER;
 
     }
 
@@ -1114,7 +1117,7 @@ public class DeepShallow implements ISuffixArrayBuilder
      */
     private int Get_small_bucket(int pos)
     {
-        return (Text[pos] << 8) + Text[pos + 1];
+        return (text[this.start + pos] << 8) + text[this.start + pos + 1];
     }
 
     /**
@@ -1125,11 +1128,11 @@ public class DeepShallow implements ISuffixArrayBuilder
         int offset, text_pos, sb, pseudo_anchor_pos, max_offset, size;
 
         // ------- search for a useful pseudo-anchor -------------
-        if (Max_pseudo_anchor_offset > 0)
+        if (MAX_PSEUDO_ANCHOR_OFFSET > 0)
         {
 
-            max_offset = min(depth - 1, Max_pseudo_anchor_offset);
-            text_pos = Sa[a];
+            max_offset = min(depth - 1, MAX_PSEUDO_ANCHOR_OFFSET);
+            text_pos = suffixArray[a];
             for (offset = 1; offset < max_offset; offset++)
             {
                 pseudo_anchor_pos = text_pos + offset;
@@ -1138,7 +1141,7 @@ public class DeepShallow implements ISuffixArrayBuilder
                 if (IS_SORTED_BUCKET(sb))
                 {
                     size = BUCKET_SIZE(sb); // size of group
-                    if (size > B2g_ratio * n) continue; // discard large groups
+                    if (size > B2G_RATIO * n) continue; // discard large groups
                     // sort a[0] ... a[n-1] using pseudo_anchor
                     pseudo_anchor_sort(a, n, pseudo_anchor_pos, offset);
                     return;
@@ -1165,7 +1168,7 @@ public class DeepShallow implements ISuffixArrayBuilder
     {
         int blind_limit;
 
-        blind_limit = Text_size / Blind_sort_ratio;
+        blind_limit = textSize / BLIND_SORT_RATIO;
         if (n <= blind_limit) blind_ssort(a, n, depth); // small_group
         else qs_unrolled_lcp(a, n, depth, blind_limit);
 
@@ -1222,7 +1225,7 @@ public class DeepShallow implements ISuffixArrayBuilder
 
             // --- partition ----
             Swap(med, hi, a); // put the pivot at the right-end
-            text_pos_pivot = text_depth + Sa[a + hi];
+            text_pos_pivot = text_depth + suffixArray[a + hi];
             i = lo - 1;
             j = hi;
             lcp_lo = lcp_hi = Integer.MAX_VALUE;
@@ -1230,23 +1233,25 @@ public class DeepShallow implements ISuffixArrayBuilder
             {
                 while (++i < hi)
                 {
-                    ris = cmp_unrolled_lcp(text_depth + Sa[a + i], text_pos_pivot);
+                    ris = cmp_unrolled_lcp(text_depth + suffixArray[a + i],
+                        text_pos_pivot);
                     if (ris > 0)
                     {
-                        if (Cmp_done < lcp_hi) lcp_hi = Cmp_done;
+                        if (cmpDone < lcp_hi) lcp_hi = cmpDone;
                         break;
                     }
-                    else if (Cmp_done < lcp_lo) lcp_lo = Cmp_done;
+                    else if (cmpDone < lcp_lo) lcp_lo = cmpDone;
                 }
                 while (--j > lo)
                 {
-                    ris = cmp_unrolled_lcp(text_depth + Sa[a + j], text_pos_pivot);
+                    ris = cmp_unrolled_lcp(text_depth + suffixArray[a + j],
+                        text_pos_pivot);
                     if (ris < 0)
                     {
-                        if (Cmp_done < lcp_lo) lcp_lo = Cmp_done;
+                        if (cmpDone < lcp_lo) lcp_lo = cmpDone;
                         break;
                     }
-                    else if (Cmp_done < lcp_hi) lcp_hi = Cmp_done;
+                    else if (cmpDone < lcp_hi) lcp_hi = cmpDone;
                 }
                 if (i >= j) break;
                 Swap(i, j, a);
@@ -1297,23 +1302,23 @@ public class DeepShallow implements ISuffixArrayBuilder
 
     /**
      * Function to compare two strings originating from the *b1 and *b2 The size of the
-     * unrolled loop must be at most equal to the costant Cmp_overshoot defined in
+     * unrolled loop must be at most equal to the costant CMP_OVERSHOOT defined in
      * common.h the function return the result of the comparison (+ or -) and writes in
-     * Cmp_done the number of successfull comparisons done
+     * cmpDone the number of successfull comparisons done
      */
     private int cmp_unrolled_lcp(int b1, int b2)
     {
 
         int c1, c2;
-        Cmp_done = 0;
+        cmpDone = 0;
 
         // execute blocks of 16 comparisons untill a difference
         // is found or we run out of the string
         do
         {
             // 1
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 return (c1 - c2);
@@ -1321,160 +1326,160 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 2
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 1;
+                cmpDone += 1;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 3
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 2;
+                cmpDone += 2;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 4
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 3;
+                cmpDone += 3;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 5
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 4;
+                cmpDone += 4;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 6
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 5;
+                cmpDone += 5;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 7
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 6;
+                cmpDone += 6;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 8
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 7;
+                cmpDone += 7;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 9
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 8;
+                cmpDone += 8;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 10
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 9;
+                cmpDone += 9;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 11
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 10;
+                cmpDone += 10;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 12
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 11;
+                cmpDone += 11;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 13
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 12;
+                cmpDone += 12;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 14
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 13;
+                cmpDone += 13;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 15
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 14;
+                cmpDone += 14;
                 return (c1 - c2);
             }
             b1++;
             b2++;
             // 16
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
-                Cmp_done += 15;
+                cmpDone += 15;
                 return (c1 - c2);
             }
             b1++;
             b2++;
 
-            Cmp_done += 16;
+            cmpDone += 16;
 
         }
-        while (b1 < Text_size && b2 < Text_size);
+        while (b1 < textSize && b2 < textSize);
 
         return b2 - b1;
 
@@ -1482,9 +1487,9 @@ public class DeepShallow implements ISuffixArrayBuilder
 
     private void Swap(int i, int j, int a)
     {
-        int tmp = Sa[a + i];
-        Sa[a + i] = Sa[a + j];
-        Sa[a + j] = tmp;
+        int tmp = suffixArray[a + i];
+        suffixArray[a + i] = suffixArray[a + j];
+        suffixArray[a + j] = tmp;
     }
 
     /**
@@ -1498,43 +1503,43 @@ public class DeepShallow implements ISuffixArrayBuilder
 
         // ---- sort suffixes in order of increasing length
         // qsort(a, n, sizeof(Int32), neg_integer_cmp);
-        Arrays.sort(Sa, a, a + n);
+        Arrays.sort(suffixArray, a, a + n);
         for (int left = 0, right = n - 1; left < right; left++, right--)
         {
             // exchange the first and last
-            int temp = Sa[a + left];
-            Sa[a + left] = Sa[a + right];
-            Sa[a + right] = temp;
+            int temp = suffixArray[a + left];
+            suffixArray[a + left] = suffixArray[a + right];
+            suffixArray[a + right] = temp;
         }
 
         // --- skip suffixes which have already reached the end-of-text
         for (j = 0; j < n; j++)
-            if (Sa[a + j] + depth < Text_size) break;
+            if (suffixArray[a + j] + depth < textSize) break;
         if (j >= n - 1) return; // everything is already sorted!
 
         // ------ init stack -------
-        // Stack = (node **) malloc(n*sizeof(node *));
+        // stack = (node **) malloc(n*sizeof(node *));
 
         // ------- init root with the first unsorted suffix
         nh = new Node();
         nh.skip = -1;
         nh.right = null;
         // nh.down = (void *) a[j];
-        nh.downInt = Sa[a + j];
+        nh.downInt = suffixArray[a + j];
         root = nh;
 
         // ------- insert suffixes a[j+1] ... a[n-1]
         for (i = j + 1; i < n; i++)
         {
-            h = find_companion(root, Sa[a + i]);
+            h = find_companion(root, suffixArray[a + i]);
             aj = h.downInt;
-            lcp = compare_suffixes(aj, Sa[a + i], depth);
-            insert_suffix(root, Sa[a + i], lcp, Text[aj + lcp]);
+            lcp = compare_suffixes(aj, suffixArray[a + i], depth);
+            insert_suffix(root, suffixArray[a + i], lcp, text[this.start + aj + lcp]);
         }
 
         // ---- traverse the trie and get suffixes in lexicographic order
-        Aux = a;
-        Aux_written = j;
+        aux = a;
+        auxWritten = j;
         traverse_trie(root);
 
     }
@@ -1547,7 +1552,7 @@ public class DeepShallow implements ISuffixArrayBuilder
     {
         Node p, nextp;
 
-        if (h.skip < 0) Sa[Aux + Aux_written++] = h.downInt;
+        if (h.skip < 0) suffixArray[aux + auxWritten++] = h.downInt;
         else
         {
             p = h.down;
@@ -1599,7 +1604,7 @@ public class DeepShallow implements ISuffixArrayBuilder
         }
 
         // -------- search the position of s[n] among *h offsprings
-        c = Text[s + n];
+        c = text[this.start + s + n];
         pp = h.down;
         while (pp != null)
         {
@@ -1636,7 +1641,7 @@ public class DeepShallow implements ISuffixArrayBuilder
 
         s1 = depth + suf1;
         s2 = depth + suf2;
-        limit = Text_size - suf1 - depth;
+        limit = textSize - suf1 - depth;
         return depth + get_lcp_unrolled(s1, s2, limit);
     }
 
@@ -1654,8 +1659,8 @@ public class DeepShallow implements ISuffixArrayBuilder
         do
         {
             // 1
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 break;
@@ -1663,8 +1668,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 2
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 1;
@@ -1673,8 +1678,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 3
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 2;
@@ -1683,8 +1688,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 4
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 3;
@@ -1693,8 +1698,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 5
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 4;
@@ -1703,8 +1708,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 6
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 5;
@@ -1713,8 +1718,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 7
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 6;
@@ -1723,8 +1728,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 8
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 7;
@@ -1733,8 +1738,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 9
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 8;
@@ -1743,8 +1748,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 10
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 9;
@@ -1753,8 +1758,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 11
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 10;
@@ -1763,8 +1768,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 12
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 11;
@@ -1773,8 +1778,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 13
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 12;
@@ -1783,8 +1788,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 14
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 13;
@@ -1793,8 +1798,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 15
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 14;
@@ -1803,8 +1808,8 @@ public class DeepShallow implements ISuffixArrayBuilder
             b1++;
             b2++;
             // 16
-            c1 = Text[b1];
-            c2 = Text[b2];
+            c1 = text[this.start + b1];
+            c2 = text[this.start + b2];
             if (c1 != c2)
             {
                 cmp2do -= 15;
@@ -1832,14 +1837,14 @@ public class DeepShallow implements ISuffixArrayBuilder
         Node p;
         int t;
 
-        Stack_size = 0; // init stack
+        stackSize = 0; // init stack
         while (head.skip >= 0)
         {
-            Stack[Stack_size++] = head;
+            stack[stackSize++] = head;
             t = head.skip;
-            if (s + t >= Text_size) // s[t] does not exist: mismatch
+            if (s + t >= textSize) // s[t] does not exist: mismatch
             return get_leaf(head);
-            c = Text[s + t];
+            c = text[this.start + s + t];
             p = head.down;
             boolean repeat = true;
             while (repeat)
@@ -1859,7 +1864,7 @@ public class DeepShallow implements ISuffixArrayBuilder
                 }
             }
         }
-        Stack[Stack_size++] = head;
+        stack[stackSize++] = head;
         return head;
     }
 
@@ -1884,10 +1889,10 @@ public class DeepShallow implements ISuffixArrayBuilder
         int pseudo_anchor_rank;
 
         // ---------- compute rank ------------
-        if (Update_anchor_ranks != 0 && Anchor_dist > 0) pseudo_anchor_rank = get_rank_update_anchors(pseudo_anchor_pos);
+        if (UPDATE_ANCHOR_RANKS != 0 && anchorDist > 0) pseudo_anchor_rank = get_rank_update_anchors(pseudo_anchor_pos);
         else pseudo_anchor_rank = get_rank(pseudo_anchor_pos);
         // ---------- check rank --------------
-        assert (Sa[pseudo_anchor_rank] == pseudo_anchor_pos);
+        assert (suffixArray[pseudo_anchor_rank] == pseudo_anchor_pos);
         // ---------- do the sorting ----------
         general_anchor_sort(a, n, pseudo_anchor_pos, pseudo_anchor_rank, offset);
 
@@ -1909,14 +1914,14 @@ public class DeepShallow implements ISuffixArrayBuilder
         lo = BUCKET_FIRST(sb);
         hi = BUCKET_LAST(sb);
         for (j = lo; j <= hi; j++)
-            if (Sa[j] == pos) return j;
+            if (suffixArray[j] == pos) return j;
         throw new RuntimeException("Illegal call to get_rank! (get_rank2)");
     }
 
     /**
      * compute the rank of the suffix starting at pos. At the same time check if the rank
      * of the suffixes in the bucket containing pos can be used to update some entries in
-     * Anchor_offset[] and Anchor_rank[] It is required that the suffix is in an already
+     * anchorOffset[] and anchorRank[] It is required that the suffix is in an already
      * sorted bucket
      */
     private int get_rank_update_anchors(int pos)
@@ -1931,25 +1936,25 @@ public class DeepShallow implements ISuffixArrayBuilder
                 "Illegal call to get_rank! (get_rank_update_anchors)");
         }
         // --- if the bucket has been already ranked just compute rank;
-        if (bucket_ranked[sb] != 0) return get_rank(pos);
+        if (bucketRanked[sb] != 0) return get_rank(pos);
         // --- rank all the bucket
-        bucket_ranked[sb] = 1;
+        bucketRanked[sb] = 1;
         rank = -1;
         lo = BUCKET_FIRST(sb);
         hi = BUCKET_LAST(sb);
         for (j = lo; j <= hi; j++)
         {
             // see if we can update an anchor
-            toffset = Sa[j] % Anchor_dist;
-            anchor = Sa[j] / Anchor_dist;
-            aoffset = Anchor_offset[anchor]; // dist of sorted suf from anchor
+            toffset = suffixArray[j] % anchorDist;
+            anchor = suffixArray[j] / anchorDist;
+            aoffset = anchorOffset[anchor]; // dist of sorted suf from anchor
             if (toffset < aoffset)
             {
-                Anchor_offset[anchor] = toffset;
-                Anchor_rank[anchor] = j;
+                anchorOffset[anchor] = toffset;
+                anchorRank[anchor] = j;
             }
             // see if we have found the rank of pos, if so store it in rank
-            if (Sa[j] == pos)
+            if (suffixArray[j] == pos)
             {
                 assert (rank == -1);
                 rank = j;
@@ -1961,9 +1966,9 @@ public class DeepShallow implements ISuffixArrayBuilder
 
     private void swap2(int a, int b)
     {
-        int tmp = Sa[a];
-        Sa[a] = Sa[b];
-        Sa[b] = tmp;
+        int tmp = suffixArray[a];
+        suffixArray[a] = suffixArray[b];
+        suffixArray[b] = tmp;
 
     }
 
@@ -1973,7 +1978,7 @@ public class DeepShallow implements ISuffixArrayBuilder
 
     private int ptr2char32(int a, int depth)
     {
-        return getword32(Sa[a] + depth);
+        return getword32(suffixArray[a] + depth);
     }
 
     /*
@@ -1982,12 +1987,13 @@ public class DeepShallow implements ISuffixArrayBuilder
      */
     private int getword32(int s)
     {
-        return Text[s] << 24 | Text[s + 1] << 16 | Text[s + 2] << 8 | Text[s + 3];
+        return text[this.start + s] << 24 | text[this.start + s + 1] << 16
+            | text[this.start + s + 2] << 8 | text[this.start + s + 3];
     }
 
     private int ptr2char(int i, int text_depth)
     {
-        return Text[Sa[i] + text_depth];
+        return text[this.start + suffixArray[i] + text_depth];
     }
 
     private int med3(int a, int b, int c, int depth)

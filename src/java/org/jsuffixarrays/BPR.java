@@ -65,8 +65,8 @@ public class BPR implements ISuffixArrayBuilder
     public final static int INSSORT_LIMIT = 15;
 
     /**
-     * If <code>true</code>, {@link #buildSuffixArray(int[], int, int)} uses a copy of 
-     * the input so it is left intact.
+     * If <code>true</code>, {@link #buildSuffixArray(int[], int, int)} uses a copy of the
+     * input so it is left intact.
      */
     private final boolean preserveInput;
 
@@ -113,13 +113,10 @@ public class BPR implements ISuffixArrayBuilder
 
         if (preserveInput)
         {
-            /*
-             * TODO: wouldn't it be better to make an exact array [0...length]
-             * and copy just the interesting fragment here? At the end of this method,
-             * suffix pointers could be moved by <code>start</code> to match the
-             * original array. 
-             */
-            seq = input.clone();
+
+            seq = new int [length + KBS_STRING_EXTENSION_SIZE];
+            this.start = 0;
+            System.arraycopy(input, start, seq, 0, length);
         }
         else
         {
@@ -458,20 +455,20 @@ public class BPR implements ISuffixArrayBuilder
         {
             if (middleRightPtr - middleLeftPtr == 2)
             {
-                computeBucketSize2_SaBucket(middleLeftPtr + 1, middleRightPtr, MAX(
+                computeBucketSize2_SaBucket(middleLeftPtr + 1, middleRightPtr, Math.max(
                     2 * offset, newOffset), q);
             }
             else
             {
                 if (middleRightPtr - middleLeftPtr == 3)
                 {
-                    computeBucketSize3_SaBucket(middleLeftPtr + 1, middleRightPtr, MAX(
-                        2 * offset, newOffset), q);
+                    computeBucketSize3_SaBucket(middleLeftPtr + 1, middleRightPtr, Math
+                        .max(2 * offset, newOffset), q);
                 }
                 else
                 {
-                    insSortUpdateRecurse_SaBucket(middleLeftPtr + 1, middleRightPtr, MAX(
-                        2 * offset, newOffset), q);
+                    insSortUpdateRecurse_SaBucket(middleLeftPtr + 1, middleRightPtr, Math
+                        .max(2 * offset, newOffset), q);
                 }
             }
         }
@@ -748,7 +745,7 @@ public class BPR implements ISuffixArrayBuilder
         int numberSmaller = smallerPivotPtr - pivotRightPtr;
         if (numberSmaller > 0)
         {
-            int swapsize = MIN((pivotRightPtr - leftPtr), numberSmaller);
+            int swapsize = Math.min((pivotRightPtr - leftPtr), numberSmaller);
             int pivotRightTmpPtr = leftPtr + swapsize - 1;
             vectorSwap(leftPtr, pivotRightTmpPtr, smallerPivotPtr - 1);
 
@@ -1316,17 +1313,6 @@ public class BPR implements ISuffixArrayBuilder
             return -1;
         }
 
-    }
-
-    // TODO: see Math.min, Math.max (and import static...).
-    private static int MAX(int a, int b)
-    {
-        return a > b ? a : b;
-    }
-
-    private int MIN(int a, int b)
-    {
-        return a < b ? a : b;
     }
 
     /**
