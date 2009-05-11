@@ -7,7 +7,6 @@ package org.jsuffixarrays;
  */
 public interface ISuffixArrayBuilder
 {
-
     /**
      * Computes suffix array for sequence of symbols (integers). The processed sequence is
      * a subsequence of <code>input</code> determined by <code>start</code> and
@@ -27,6 +26,10 @@ public interface ISuffixArrayBuilder
      *         suffix that precede it. Note that the output array may be larger than
      *         <code>input.length</code>, in which case only the first
      *         <code>input.length</code> elements are of relevance.
+     *         <p>
+     *         The returned array contains suffix indexes starting from 0 (so
+     *         <code>start</code> needs to be added manually to access a given suffix in
+     *         <code>input</code>).
      */
     int [] buildSuffixArray(int [] input, int start, int length);
 }
