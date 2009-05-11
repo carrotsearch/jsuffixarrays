@@ -1,24 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <project basedir="." default="compile" name="thesis-code">
-	<property environment="env" />
-
 	<property name="junit.output.dir" location="tmp/junit" />
-	<property name="perf.logs" location="tmp/perf" />
-
 	<property name="compiled.classes.dir" location="tmp/build/classes" />
 	<property name="compiled.tests.dir" location="tmp/build/test" />
-	<property name="corpus.dir" location="../corpus" />
 
-	<property name="debuglevel" value="source,lines,vars" />
-
-	<!--
-	TODO: There should be a way of compiling in 1.5 mode (which is sensible)
-	just by adding <copy> with a replacer removing @Override from anything. This is only
-	for informational purposes and should work fine for compilation. 
-	  -->
-	<property name="target" value="1.6" />
-	<property name="source" value="1.6" />
+	<!-- Compilation presets. -->
+	<presetdef name="javac">
+		<javac deprecation="true" debug="true" target="1.6" source="1.6" encoding="UTF-8" includeantruntime="false" optimize="true" />
+	</presetdef>
 
 	<path id="tests.classpath">
 		<fileset dir="lib">
@@ -38,7 +28,7 @@
 			<exclude name="*slf4j*.jar" />
 		</fileset>
 	</path>
-	
+
 	<target name="init">
 		<mkdir dir="${compiled.tests.dir}" />
 		<mkdir dir="${compiled.classes.dir}" />
@@ -50,8 +40,10 @@
 		</delete>
 	</target>
 
+	<!-- -->
 	<target name="compile" depends="compile.code, compile.tests" description="Compile tests and code." />
 
+	<!-- -->
 	<target name="compile.tests" depends="init">
 		<taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
 			<classpath refid="tests.classpath" />
@@ -68,16 +60,6 @@
 			<classpath refid="compilation.classpath" />
 		</iajc>
 
-		<!--
-        <javac destdir="${compiled.tests.dir}"
-                debug="true" debuglevel="${debuglevel}" source="${source}" target="${target}">
-            <src path="src/test" />
-            <src path="src/perf" />
-            <classpath refid="compilation.classpath"/>
-            <classpath refid="tests.classpath"/>
-        </javac>
-        -->
-
 		<copy includeemptydirs="false" todir="${compiled.tests.dir}">
 			<fileset dir="src/test">
 				<exclude name="**/*.java" />
@@ -87,6 +69,7 @@
 		</copy>
 	</target>
 
+	<!-- -->
 	<target name="compile.code" depends="init">
 		<echo message="${ant.project.name}: ${ant.file}" />
 
@@ -100,6 +83,7 @@
 		</copy>
 	</target>
 
+	<!-- -->
 	<target name="test" depends="compile" description="Run JUnit tests.">
 		<mkdir dir="${junit.output.dir}" />
 
@@ -124,195 +108,4 @@
 			<report format="frames" todir="${junit.output.dir}" />
 		</junitreport>
 	</target>
-
-	
-	<!-- Performance tests --> 
-
-	<target name="perf.all" depends="compile" description="Run all performance tests.">
-		<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-			<classpath location="lib/ant-contrib-1.0b3.jar" />
-		</taskdef>
-
-		<!-- <property name="algorithms" value="NS_2 SKEW DIVSUFSORT SAIS QSUFSORT BPR DEEP_SHALLOW" /> -->
-		<property name="algorithms" value="DIVSUFSORT BPR DEEP_SHALLOW" />
-
-		<delete dir="${perf.logs}" failonerror="false" />
-		<mkdir dir="${perf.logs}" />
-
-		<foreach list="${algorithms}" delimiter=" " param="algorithm" target="perf.random" />
-		<foreach list="${algorithms}" delimiter=" " param="algorithm" target="perf.textfiles" />
-	</target>
-	
-	<target name="perf.textfiles">
-    	<fileset dir="${corpus.dir}" id="files">
-          <include name="**/*"/>
-        </fileset>
-		
-		<echo>${basedir}</echo>
-		<pathconvert pathsep=", " property="filenames" refid="files">
-			<map from="${corpus.dir}/" to=''/>
-		</pathconvert>
-		
-	  <property name="algorithm" value="${algorithm}" />
-      <foreach list="${filenames}" delimiter=", " param="filename" target="perf.textfile" />
-    </target>
-	
-
-	<!-- Define JVM launchers -->
-	
-	<macrodef name="run-jvm">
-	    <attribute name="stderror" />
-	    <attribute name="stdoutput" />
-		<attribute name="args" />
-		<attribute name="id" />
-		<attribute name="jvm" />
-
-	    <sequential>
-	    	<property file="jvm.properties" />
-	    	
-	    	<if><isset property="@{jvm}.home" />
-	    	<then>
-		    	<echo>  Running on: @{jvm} (@{id})...</echo>
-
-				<pathconvert property="perf.classpath">
-			        <path refid="compilation.classpath" />
-			        <path refid="tests.classpath" />
-
-					<!-- 
-					For performance tests, tests classpath comes first, so that
-					instrumented classes are read before original classes.
-					-->
-			        <path location="${compiled.tests.dir}" />
-			        <path location="${compiled.classes.dir}" />
-				</pathconvert>
-	    		<propertyregex input="@{stdoutput}" property="stdoutput.repl"
-	              regexp="\-JVM" replace="-@{id}" override="true" />
-	    		<propertyregex input="@{stderror}" property="stderror.repl"
-	              regexp="\-JVM" replace="-@{id}" override="true" />
-	    		<propertyregex input="@{args}" property="args.repl"
-	              regexp="\-JVM" replace="-@{id}" override="true" />
-				<exec executable="${@{jvm}.home}/bin/java" 
-					failonerror="true" failifexecutionfails="true" vmlauncher="false" 
-					output="${stdoutput.repl}" error="${stderror.repl}">
-					<arg value="-cp"/><arg value="${perf.classpath}" />
-					<arg line="${args.repl}" />
-				</exec>
-	    	</then>
-    		<else>
-		    	<echo>  Skipping: @{id} (no @{jvm}.home property)</echo>
-    		</else>
-    		</if>
-	    </sequential>		
-	</macrodef>
-	
-	<macrodef name="all-jvms">
-	    <attribute name="stderror" />
-	    <attribute name="stdoutput" />
-		<attribute name="args" />
-
-		<sequential>
-			<property name="memory" value="-Xmx1000m" />
-
-			<!-- Inline/ JIT info (requires debug version of JRE + debugger.so -->
-			<!--
-				-XX:+UnlockDiagnosticVMOptions
-	            -XX:+PrintCompilation
-	            -XX:+PrintInlining
-	            -XX:+PrintBailouts
-	            -XX:CICompilerCount=1
-
-	            -XX:+PrintAssembly
-				-XX:CompileCommand=compileonly,*KarkkainenSanders.*
-				-XX:+PrintDependencies
-			-->
-			<run-jvm
-				id="sun-1.6"
-				jvm="sun-1.6-jvm"
-				stderror="@{stderror}" stdoutput="@{stdoutput}" 
-				args="-server ${memory} @{args}" 
-			/>
-
-			<!--
-			<run-jvm
-				id="sun-1.6-client"
-				jvm="sun-1.6-jvm"
-				stderror="@{stderror}" stdoutput="@{stdoutput}" 
-				args="-client ${memory} @{args}" />
-			-->
-			<run-jvm
-				id="harmony-1.5"
-				jvm="harmony-1.5-jvm"
-				stderror="@{stderror}" stdoutput="@{stdoutput}" 
-				args="-server ${memory} -Xno_parallel_jit @{args}" />
-
-			<run-jvm
-				id="ibm-1.6"
-				jvm="ibm-1.6-jvm"
-				stderror="@{stderror}" stdoutput="@{stdoutput}" 
-				args="-server ${memory} @{args}" />
-
-			<run-jvm
-				id="jrockit-1.6"
-				jvm="jrockit-1.6-jvm"
-				stderror="@{stderror}" stdoutput="@{stdoutput}" 
-				args="-server ${memory} @{args}" />
-
-		</sequential>
-	</macrodef>
-
-	<!-- Specific tests -->
-
-	<target name="perf.random">
-		<echo>Random performance test on algorithm: ${algorithm}</echo>
-
-		<property name="output.prefix" 
-			location="${perf.logs}/random-input" />
-
-		<var name="args" value="
-			org.jsuffixarrays.TimeOnRandomInput
-			${algorithm}
-			--alphabet-size 32
-			--start-size 1000000
-			--increment 1000000
-			--rounds 20
-			--warmup-rounds 5
-		" />
-
-		<mkdir dir="${output.prefix}/outerr/" />
-		
-		<all-jvms
-			stdoutput="${output.prefix}/outerr/${algorithm}-JVM.out" 
-			stderror="${output.prefix}/outerr/${algorithm}-JVM.err" 
-			args="
-				${args}
-				-o &quot;${output.prefix}/${algorithm}-JVM.txt&quot;
-			"
-		/>
-	</target>	
-	
-	<target name="perf.textfile">
-	        <echo>Performance test on algorithm: ${algorithm} on input from: ${filename}</echo>
-
-	        <property name="output.prefix" 
-	            location="${perf.logs}/${filename}" />
-
-	        <var name="args" value="
-	            org.jsuffixarrays.TimeOnFile
-	            ${algorithm}
-	        	${corpus.dir}/${filename}
-	            --rounds 20
-	            --warmup-rounds 5
-	        " />
-
-	        <mkdir dir="${output.prefix}/outerr/" />
-	        
-	        <all-jvms
-	            stdoutput="${output.prefix}/outerr/${algorithm}-JVM.out" 
-	            stderror="${output.prefix}/outerr/${algorithm}-JVM.err" 
-	            args="
-	                ${args}
-	                -o &quot;${output.prefix}/${algorithm}-JVM.txt&quot;
-	            "
-	        />
-	    </target>   
 </project>
