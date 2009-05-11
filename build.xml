@@ -5,11 +5,6 @@
 	<property name="compiled.classes.dir" location="tmp/build/classes" />
 	<property name="compiled.tests.dir" location="tmp/build/test" />
 
-	<!-- Compilation presets. -->
-	<presetdef name="javac">
-		<javac deprecation="true" debug="true" target="1.6" source="1.6" encoding="UTF-8" includeantruntime="false" optimize="true" />
-	</presetdef>
-
 	<path id="tests.classpath">
 		<fileset dir="lib">
 			<include name="junit.jar" />
@@ -29,11 +24,28 @@
 		</fileset>
 	</path>
 
+	<taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
+		<classpath refid="tests.classpath" />
+	</taskdef>
+
+	<!-- Compilation presets. -->
+	<presetdef name="javac">
+		<javac deprecation="true" debug="true" 
+			target="1.6" source="1.6" encoding="UTF-8" includeantruntime="false" optimize="true" />
+	</presetdef>
+
+	<!-- -->
+	<presetdef name="iajc">
+		<iajc target="1.6" source="1.6" encoding="UTF-8" />
+	</presetdef>
+
+	<!-- -->
 	<target name="init">
 		<mkdir dir="${compiled.tests.dir}" />
 		<mkdir dir="${compiled.classes.dir}" />
 	</target>
 
+	<!-- -->
 	<target name="clean" description="Clean all intermediate files.">
 		<delete dir="tmp">
 			<exclude name="eclipse/**" />
@@ -45,11 +57,7 @@
 
 	<!-- -->
 	<target name="compile.tests" depends="init">
-		<taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
-			<classpath refid="tests.classpath" />
-		</taskdef>
-
-		<iajc destDir="${compiled.tests.dir}" incremental="false" encoding="UTF-8" source="${source}" target="${target}">
+		<iajc destDir="${compiled.tests.dir}" incremental="false">
 			<sourceroots>
 				<pathelement location="src/test" />
 				<pathelement location="src/perf" />
@@ -73,7 +81,7 @@
 	<target name="compile.code" depends="init">
 		<echo message="${ant.project.name}: ${ant.file}" />
 
-		<javac destdir="${compiled.classes.dir}" debug="true" debuglevel="${debuglevel}" source="${source}" target="${target}">
+		<javac destdir="${compiled.classes.dir}">
 			<src path="src/java" />
 			<classpath refid="compilation.classpath" />
 		</javac>
