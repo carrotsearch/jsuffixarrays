@@ -1,23 +1,15 @@
 package org.jsuffixarrays;
 
-import static org.apache.commons.lang.SystemUtils.JAVA_VM_INFO;
-import static org.apache.commons.lang.SystemUtils.JAVA_VM_NAME;
-import static org.apache.commons.lang.SystemUtils.JAVA_VM_VENDOR;
-import static org.apache.commons.lang.SystemUtils.JAVA_VM_VERSION;
+import static org.apache.commons.lang.SystemUtils.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Locale;
-import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import org.apache.commons.lang.SystemUtils;
+import org.kohsuke.args4j.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +69,7 @@ public class TimeOnRandomInput
     }, metaVar = "file", name = "-o", required = false, usage = "Output file (if not given, stdout is used)")
     public File output;
 
-    @Argument(index = 0, required = true, usage = "Algorithm to test.")
+    @Argument(index = 0, required = true, metaVar = "algorithm", usage = "Algorithm to test (Algorithm class constant).")
     public Algorithm algorithm;
 
     /*
@@ -112,23 +104,26 @@ public class TimeOnRandomInput
         logger.info("Algorithm: " + algorithm + ", alphabet: " + alphabetSize
             + ", extraCells: " + extraCells + ", seed: " + randomSeed);
 
+        logger.info("Time: " + new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
         logger.info("JVM name: " + JAVA_VM_NAME);
         logger.info("JVM version: " + JAVA_VM_VERSION);
         logger.info("JVM info: " + JAVA_VM_INFO);
         logger.info("JVM vendor: " + JAVA_VM_VENDOR);
+        logger.info("OS arch: " + SystemUtils.OS_ARCH);
+        logger.info("OS name: " + SystemUtils.OS_NAME);
+        logger.info("OS version: " + SystemUtils.OS_VERSION);
         logger.info("JVM max memory: " + rt.maxMemory());
 
         logger.info("Allocating random input: " + maxSize + " bytes.");
         final int [] input = SuffixArrayBuilderTestBase.generateRandom(rnd, maxSize
             + extraCells, alphabet);
 
-        out.println(String.format(Locale.US, "%4s " + "%7s " + "%7s " + "%7s " + "%5s  "
+        out.println(String.format(Locale.US, "# %4s " + "%8s " + "%7s " + "%7s " + "%5s  "
             + "%s", "rnd", "size", "time", "mem(MB)", "av.lcp", "status"));
 
         /*
          * Run the test. Warmup rounds have negative round numbers.
          */
-        logger.info("Running the test.");
         final ISuffixArrayBuilder builder = algorithm.getInstance();
         int size = startSize;
         for (int round = -warmup; round < rounds; round++)
@@ -164,7 +159,7 @@ public class TimeOnRandomInput
 
             // round, input size, suffix building time, mem used (MB), avg.lcp,
             // status
-            final String result = String.format(Locale.US, "%4d " + "%7d " + "%7.3f "
+            final String result = String.format(Locale.US, "%6d " + "%8d " + "%7.3f "
                 + "%7.3f " + "%5.2f  " + "%s", round, size,
                 (endTime - startTime) / 1000.0d, MemoryLogger.getMemoryUsed()
                     / (double) (1024 * 1024), averageLCP, status);

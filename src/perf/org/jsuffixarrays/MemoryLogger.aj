@@ -43,7 +43,7 @@ abstract aspect MemoryLogger issingleton()
     /**
      * Starting amount of memory from which we will begin measurements.
      * 
-     * @see #reset();
+     * @see #reset()
      */
     private static volatile long startingPoint;
     
@@ -121,7 +121,7 @@ aspect SkewMemLogger extends MemoryLogger
 /**
  * Track memory in {@link NaiveSort} algorithm.
  */
-aspect NaiveSort2MemLogger extends MemoryLogger
+aspect NaiveSortMemLogger extends MemoryLogger
 {
     @Override
     pointcut tracedClasses() : within(NaiveSort);
@@ -135,8 +135,7 @@ aspect NaiveSort2MemLogger extends MemoryLogger
 aspect DivSufSortMemLogger extends MemoryLogger
 {
     /* 3 methods using stack are excluded, because they use max. 64 * 4 bytes of extra memory for stack */
-    //TODO: somehow exclude TRBudget class
-    //within(DivSufSort && !DivSufSort.TRBudget) doesnt work);
+    // TODO: somehow exclude TRBudget class; within(DivSufSort && !DivSufSort.TRBudget) does not work);
     @Override
     pointcut tracedClasses(): within(DivSufSort);
     @Override

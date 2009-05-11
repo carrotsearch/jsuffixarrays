@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-<project basedir="." default="compile" name="thesis-code">
+<project basedir="." default="all" name="thesis-code">
 	<property name="junit.output.dir" location="tmp/junit" />
 	<property name="compiled.classes.dir" location="tmp/build/classes" />
 	<property name="compiled.tests.dir" location="tmp/build/test" />
@@ -11,6 +11,7 @@
 			<include name="aspectj*.jar" />
 			<include name="args4j*.jar" />
 			<include name="*slf4j*.jar" />
+			<include name="log4j*.jar" />
 		</fileset>
 	</path>
 
@@ -115,5 +116,25 @@
 			</fileset>
 			<report format="frames" todir="${junit.output.dir}" />
 		</junitreport>
+	</target>
+
+    <!-- -->
+    <target name="cp" description="Emit classpath required to run performance tests.">
+        <!--
+        For performance tests, tests classpath comes first, so that
+        instrumented classes are read before original classes.
+        -->
+    	<pathconvert property="perf.classpath">
+    		<path refid="compilation.classpath" />
+    		<path refid="tests.classpath" />
+    	    <path location="${compiled.tests.dir}" />
+    	    <path location="${compiled.classes.dir}" />
+    	</pathconvert>
+
+    	<echo file="tmp/perf.classpath">${perf.classpath}</echo>
+    </target>
+
+	<!-- -->
+	<target name="all" depends="compile, test, cp">
 	</target>
 </project>

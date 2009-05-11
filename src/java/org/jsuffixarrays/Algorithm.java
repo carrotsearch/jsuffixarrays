@@ -13,7 +13,7 @@ public enum Algorithm
     SKEW_D("Kärkkäinen-Sanders (decorated for arbitrary input symbols)"),
 
     /** Naive sort (quicksort on primitive arrays). */
-    NS_2("Naive sort using primitive arrays"),
+    NS("Naive sort using primitive arrays"),
 
     /** Yuta Mori's divsufsort algorithm. */
     DIVSUFSORT("Mori's algorithm"),
@@ -24,6 +24,7 @@ public enum Algorithm
     /** Klaus-Bernd Schürmann's bucket pointer refinement algorithm */
     BPR("Klaus-Bernd Schürmann's bpr algorithm"),
 
+    /** Deep-Shallow algorithm by Manzini and Ferragina. */
     DEEP_SHALLOW("Manzini-Ferragina"),
 
     /** "Larrson-Sadakane qsufsort algorithm */
@@ -54,7 +55,7 @@ public enum Algorithm
                 return new NonNegativeCompactingDecorator(
                     new ExtraCellsZeroIndexDecorator(new Skew(), 3));
 
-            case NS_2:
+            case NS:
                 return new NaiveSort();
 
             case DIVSUFSORT:
