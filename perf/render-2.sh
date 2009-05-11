@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Render log files from a given directory using gnuplot (time plot).
+# Render log files from a given directory using gnuplot (memory graph).
 #
 
 . ./setup.sh
@@ -29,9 +29,9 @@ cat >.tmp.gnuplot <<EOF
     set ytics border nomirror
     set tics scale 1.0
 
-    set title "time on random input"
+    set title "memory on random input"
     set xlabel "input size [millions elements]"
-    set ylabel "time [s]"
+    set ylabel "memory [MB]"
 
     set output "${OUTPUT_FILE}.eps"
 
@@ -48,8 +48,8 @@ for file in `find results/random-input -name "*.log" -print | sort`; do
 name=`basename $file .log | tr _ -` 
 cat >>.tmp.gnuplot <<EOF
     "$file" \\
-	   using (\$2 / 1000000):(\$1 > 0 ? \$3 : 1/0) t ""       with lines ls 1, \\
-	"" using (\$2 / 1000000):(\$1 > 0 ? \$3 : 1/0) t "$name"  with points lc rgb "#000000",     \\
+	   using (\$2 / 1000000):(\$1 > 0 ? \$4 : 1/0) t ""       with lines ls 1, \\
+	"" using (\$2 / 1000000):(\$1 > 0 ? \$4 : 1/0) t "$name"  with points lc rgb "#000000",     \\
 EOF
 done
 echo -e '"" using 1:(1/0) t ""\n\n' >> .tmp.gnuplot

@@ -31,4 +31,5 @@ done
 # Render plots.
 #
 
-./render-1.sh $OUTPUT_DIR ${OUTPUT_DIR}
+./render-1.sh $OUTPUT_DIR results/random-input-time
+./render-2.sh $OUTPUT_DIR results/random-input-memory
