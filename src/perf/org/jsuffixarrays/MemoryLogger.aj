@@ -119,12 +119,12 @@ aspect SkewMemLogger extends MemoryLogger
 }
 
 /**
- * Track memory in {@link NaiveSort2} algorithm.
+ * Track memory in {@link NaiveSort} algorithm.
  */
 aspect NaiveSort2MemLogger extends MemoryLogger
 {
     @Override
-    pointcut tracedClasses() : within(NaiveSort2);
+    pointcut tracedClasses() : within(NaiveSort);
     @Override
     pointcut excludedMethods(): execution(* compare(..));
 }

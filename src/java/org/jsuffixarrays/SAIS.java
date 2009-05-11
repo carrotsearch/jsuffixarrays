@@ -28,7 +28,6 @@ package org.jsuffixarrays;
 
 /*
  * TODO: [dw] Clean up the code, resign from interfaces and use primitive types instead?
- * TODO: [dw] Add publication/ Web site reference here. Attribution.
  */
 
 /**
@@ -41,7 +40,7 @@ package org.jsuffixarrays;
  * Ge Nong, Sen Zhang and Wai Hong Chan, Two Efficient Algorithms for Linear Suffix Array
  * Construction, 2008.
  * 
- * @see http://yuta.256.googlepages.com/sais
+ * @see "http://yuta.256.googlepages.com/sais"
  */
 public final class SAIS implements ISuffixArrayBuilder
 {

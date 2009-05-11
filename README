@@ -23,3 +23,7 @@ Developers (Eclipse)
 You'll need to install JDT weaving support from:
 http://download.eclipse.org/tools/ajdt/34/dev/update
 
+Requirements
+------------
+
+Java 1.6 is required. 

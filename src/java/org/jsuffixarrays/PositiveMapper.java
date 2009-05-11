@@ -1,14 +1,11 @@
-/**
- * 
- */
 package org.jsuffixarrays;
 
 /**
- * Simple mapper that maps input to positive values.
+ * Simple mapper that maps input to values larger than zero.
  */
 public class PositiveMapper implements IMapper
 {
-    final int offset;
+    private final int offset;
 
     public PositiveMapper(int [] input, int start, int length)
     {
@@ -26,7 +23,6 @@ public class PositiveMapper implements IMapper
         {
             input[i] = input[i] + offset;
         }
-
     }
 
     @Override
@@ -36,7 +32,5 @@ public class PositiveMapper implements IMapper
         {
             input[i] = input[i] - offset;
         }
-
     }
-
 }

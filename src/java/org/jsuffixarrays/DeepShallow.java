@@ -54,6 +54,9 @@ public class DeepShallow implements ISuffixArrayBuilder
         Node right;
     }
 
+    /**
+     * TODO: magic constant?
+     */
     public final static int overshoot = 575;
 
     private final static int SETMASK = 1 << 30;
@@ -109,7 +112,7 @@ public class DeepShallow implements ISuffixArrayBuilder
      * <p>
      * Additional constraints enforced by Deep-Shallow algorithm:
      * <ul>
-     * <li>non-negative ( &ge; 0) symbols in the input</li>
+     * <li>non-negative (&ge;0) symbols in the input</li>
      * <li>maximal symbol value &lt; <code>256</code></li>
      * <li><code>input.length</code> &gt;=
      * <code>start + length + {@link #overshoot}</code></li>
@@ -869,7 +872,7 @@ public class DeepShallow implements ISuffixArrayBuilder
     {
         int r, partval;
         int pa, pb, pc, pd, pa_old, pd_old;// pointers
-        int pivot_pos, t;
+        int pivot_pos;
         int text_depth, text_limit;// pointers
 
         // --------- initialization ------------------------------------
@@ -1155,7 +1158,7 @@ public class DeepShallow implements ISuffixArrayBuilder
         int [] stack_lo = new int [STACK_SIZE];
         int [] stack_hi = new int [STACK_SIZE];
         int [] stack_d = new int [STACK_SIZE];
-        int sp, r, r3, med, tmp;
+        int sp, r, r3, med;
         int i, j, lo, hi, ris, lcp_lo, lcp_hi;
         // ----- init quicksort --------------
         r = sp = 0;
@@ -1555,7 +1558,6 @@ public class DeepShallow implements ISuffixArrayBuilder
      */
     private void insert_suffix(Node h, int suf, int n, int mmchar)
     {
-        int t;
         int c, s;
         Node p, pp;
 
@@ -2021,5 +2023,4 @@ public class DeepShallow implements ISuffixArrayBuilder
     {
         return ftab[((b) + 1) << 8] - ftab[(b) << 8];
     }
-
 }

@@ -4,9 +4,10 @@ import java.util.Arrays;
 
 /**
  * <p>
- * Straightforward reimplementation of the bucket pointer refinement algorithm given in:
+ * A straightforward reimplementation of the bucket pointer refinement algorithm given in:
  * <tt>
- * Klaus-Bernd Schürmann, Suffix Arrays in Theory and Practice, Faculty of Technology of Bielefeld University, Germany, 2007
+ * Klaus-Bernd Schürmann, Suffix Arrays in Theory and Practice, Faculty of Technology of 
+ * Bielefeld University, Germany, 2007
  * </tt>
  * <p>
  * This implementation is basically a translation of the C version given by Klaus-Bernd
@@ -17,8 +18,7 @@ import java.util.Arrays;
  */
 public class BPR implements ISuffixArrayBuilder
 {
-
-    class Alphabet
+    private final static class Alphabet
     {
         int size;
         int [] charArray;
@@ -41,6 +41,7 @@ public class BPR implements ISuffixArrayBuilder
                 }
                 charFreq[tmpChar]++;
             }
+
             charArray = new int [size + 1];
             charArray[size] = 0;
             int k = 0;
@@ -58,16 +59,17 @@ public class BPR implements ISuffixArrayBuilder
         }
     }
 
-    /**
-     * If <code>true</code>, {@link #buildSuffixArray(int[], int, int)} uses copy of input
-     * so it is left intact.
-     */
-    private final boolean preserveInput;
-
     public final static int KBS_MAX_ALPHABET_SIZE = 256;
     public final static int KBS_INSSORT_THRES_LEN = 15;
     public final static int KBS_STRING_EXTENSION_SIZE = 32;
     public final static int INSSORT_LIMIT = 15;
+
+    /**
+     * If <code>true</code>, {@link #buildSuffixArray(int[], int, int)} uses a copy of 
+     * the input so it is left intact.
+     */
+    private final boolean preserveInput;
+
     private int [] seq;
     private int length;
     private Alphabet alphabet;
@@ -78,7 +80,7 @@ public class BPR implements ISuffixArrayBuilder
 
     public BPR()
     {
-        preserveInput = true;
+        this(true);
     }
 
     public BPR(boolean preserveInput)
@@ -108,8 +110,15 @@ public class BPR implements ISuffixArrayBuilder
             "input is too short");
         Tools.assertAlways(length >= 2, "input length must be >= 2");
         this.start = start;
+
         if (preserveInput)
         {
+            /*
+             * TODO: wouldn't it be better to make an exact array [0...length]
+             * and copy just the interesting fragment here? At the end of this method,
+             * suffix pointers could be moved by <code>start</code> to match the
+             * original array. 
+             */
             seq = input.clone();
         }
         else
@@ -152,7 +161,6 @@ public class BPR implements ISuffixArrayBuilder
      */
     private void kbs_buildDstepUsePrePlusCopyFreqOrder_SuffixArray(int q)
     {
-
         int [] buckets = determine_Buckets_Sarray_Sptrmap(q);
 
         /* Sorting of all buckets */
@@ -378,6 +386,7 @@ public class BPR implements ISuffixArrayBuilder
          * since the sufPtrMap for the suffixes between leftPtr and rightPtr might change
          * in previous 2 steps
          */
+
         /*
          * determine the bucket concerning suffixptr+offset between leftPtr and rightPtr
          * separately
@@ -1309,6 +1318,7 @@ public class BPR implements ISuffixArrayBuilder
 
     }
 
+    // TODO: see Math.min, Math.max (and import static...).
     private static int MAX(int a, int b)
     {
         return a > b ? a : b;
@@ -1337,5 +1347,4 @@ public class BPR implements ISuffixArrayBuilder
         }
         return a < b ? (b < c ? 1 : (a < c ? 2 : 0)) : (b > c ? 1 : (a < c ? 0 : 2));
     }
-
 }

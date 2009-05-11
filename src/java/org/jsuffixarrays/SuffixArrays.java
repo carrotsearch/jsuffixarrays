@@ -6,6 +6,12 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PrimitiveArrays;
 
+/*
+ * TODO: ultimately, this class should be "intelligent" enough to pick the best
+ * algorith, depending on the distribution and properties of the input (alphabet size,
+ * symbols distribution, etc.).
+ */
+
 /**
  * <p>
  * Factory-like methods for constructing suffix arrays for various data types. Whenever
@@ -15,7 +21,7 @@ import com.google.common.collect.PrimitiveArrays;
  * Note the following important aspects that apply to nearly all methods in this class:
  * <ul>
  * <li>In nearly all cases, the returned suffix array will not be length-equal to the
- * input sequence (will be slightly larger). It is so because most alorithms use extra
+ * input sequence (will be slightly larger). It is so because most algorithms use extra
  * space for end of sequence delimiters and it makes little sense to temporary duplicate
  * memory consumption just to have exact length counts.</li>
  * </ul>

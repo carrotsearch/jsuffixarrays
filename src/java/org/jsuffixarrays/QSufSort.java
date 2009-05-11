@@ -4,10 +4,10 @@ import static org.jsuffixarrays.Tools.assertAlways;
 
 /**
  * <p>
- * Straightforward reimplementation of the qsufsort algorithm given in: <tt>
+ * Straightforward reimplementation of the qsufsort algorithm given in: <pre><code>
  * Larsson, N. Jesper and Sadakane, Kunihiko. Faster Suffix Sorting. 
  * Report number LU-CS-TR:99-214, LUNDFD6/(NFCS-3140)/1--20/(1999). Department of Computer Science, Lund University"
- * </tt>
+ * </code></pre>
  * <p>
  * This implementation is basically a translation of the C version given by Peter Sanders:
  * <tt>http://www.mpi-inf.mpg.de/~sanders/programs/suffix/</tt>
@@ -15,8 +15,7 @@ import static org.jsuffixarrays.Tools.assertAlways;
  * The implementation of this algorithm makes some assumptions about the input. See
  * {@link #buildSuffixArray(int[], int, int)} for details.
  * <p>
- * Algorithm modifies input during processing. See {@link QSufSort#preserveInput} and
- * {@link #QSufSort(boolean)}.
+ * Algorithm modifies input during processing, see {@link #QSufSort(boolean)}.
  */
 public class QSufSort implements ISuffixArrayBuilder
 {
@@ -41,7 +40,8 @@ public class QSufSort implements ISuffixArrayBuilder
     private int start;
 
     /**
-     * Default constructor, sets <code>preserveInput</code> to <code>false</false>.
+     * Default constructor, uses the input array of symbols to preserve memory (and destroys
+     * it). 
      */
     public QSufSort()
     {
@@ -49,7 +49,8 @@ public class QSufSort implements ISuffixArrayBuilder
     }
 
     /**
-     * Sets {@link #preserveInput} to given value.
+     * If <code>true</code>, the algorithm will use a copy of the 
+     * input so it is left intact.
      */
     public QSufSort(boolean preserveInput)
     {
@@ -58,9 +59,6 @@ public class QSufSort implements ISuffixArrayBuilder
 
     /**
      * {@inheritDoc}
-     * <p>
-     * qsufsort algorithm modifies input table during processing. See
-     * {@link QSufSort#preserveInput} for more information.
      * <p>
      * Additional constraints enforced by qsufsort algorithm:
      * <ul>

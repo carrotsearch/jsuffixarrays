@@ -24,7 +24,7 @@ public enum Algorithm
     /** Klaus-Bernd Schürmann's bucket pointer refinement algorithm */
     BPR("Klaus-Bernd Schürmann's bpr algorithm"),
 
-    DEEP_SHALLOW("Manzini-Ferragin"),
+    DEEP_SHALLOW("Manzini-Ferragina"),
 
     /** "Larrson-Sadakane qsufsort algorithm */
     QSUFSORT("Larrson-Sadakane qsufsort algorithm");
@@ -55,7 +55,7 @@ public enum Algorithm
                     new ExtraCellsZeroIndexDecorator(new Skew(), 3));
 
             case NS_2:
-                return new NaiveSort2();
+                return new NaiveSort();
 
             case DIVSUFSORT:
                 return new DivSufSort();

@@ -4,8 +4,6 @@ package org.jsuffixarrays;
  * In the "dense" scenario we keep "forward" mapping between original keys (shifted to
  * positive indexes) and their new key values. A "reverse" mapping is used to restore
  * original values in place of the mapped keys upon exit.
- * 
- * @see IMapper
  */
 final class DensePositiveMapper implements IMapper
 {

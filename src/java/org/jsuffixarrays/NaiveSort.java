@@ -11,7 +11,7 @@ import com.google.common.collect.PrimitiveArrays;
  * A naive implementation of suffix sorting based on primitive integer collections and
  * custom sorting routines (quicksort).
  */
-public final class NaiveSort2 implements ISuffixArrayBuilder
+public final class NaiveSort implements ISuffixArrayBuilder
 {
     /**
      * {@inheritDoc}

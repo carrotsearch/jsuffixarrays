@@ -2,14 +2,13 @@ package org.jsuffixarrays;
 
 import static org.jsuffixarrays.Tools.assertAlways;
 
-// TODO: Add proper attribution.
 /**
  * <p>
- * Straightforward reimplementation of the divsufsort algorithm given in: <tt>
+ * Straightforward reimplementation of the divsufsort algorithm given in: <pre><code>
  * Yuta Mori, Short description of improved two-stage suffix sorting
  * algorithm, 2005.
  * http://homepage3.nifty.com/wpage/software/itssort.txt
- * </tt>
+ * </code></pre>
  * <p>
  * This implementation is basically a translation of the C version given by Yuta Mori:
  * <tt>libdivsufsort-2.0.0, http://code.google.com/p/libdivsufsort/</tt>
@@ -167,7 +166,7 @@ public final class DivSufSort implements ISuffixArrayBuilder
      * Additional constraints enforced by DivSufSort algorithm:
      * <ul>
      * <li>non-negative (&ge;0) symbols in the input</li>
-     * <li>symbols limited by {@link #ALPHABET_SIZE} (&lt; <code>ALPHABET_SIZE</code>)</li>
+     * <li>symbols limited by alphabet size passed in the constructor.</li>
      * <li>length >= 2</li>
      * </ul>
      * <p>
