@@ -1,5 +1,19 @@
 
-Various things and ideas
+Performance tests:
+
+- Add time-on-alphabet-size charts [fixed input size, varying alphabet]
+
+- Add memory-on-random-input (same script, different Y column for the chart).
+
+- Add speed on various JVMs [fixed input, fixed alphabet, varying JVM]
+
+- Tests should perform an average of N samples for each input configuration
+  (should it be done by the scripts or by the Java test classes?)
+
+Various things and ideas:
+
+- Measure memory allocation (there should be none or minimal for almost any algorithm). 
+  GC will always downgrade performance.
 
 - Is it possible to write an aspect tracking allocation of primitive type arrays? Would
   it be helpful to write it so that we know how much memory an algorithm asks for (this
@@ -8,8 +22,6 @@ Various things and ideas
 
 - Write a test comparing speed of LCP calculation (naive vs. Kasai) 
   for various random inputs.
-
-- More, more algorithms.
 
 - We will need an external bundle with performance tests (and their results?) appearing
   in literature. This will be used to measure performance. Add a test similar to 
@@ -21,9 +33,6 @@ Various things and ideas
   - JamVM, http://jamvm.sourceforge.net/
   - CACAO, http://www.cacaojvm.org/
   - Jikes RVM
-
-- Can we try to compile perf. tests (or a relevant subset of these tests) 
-  to native code using GCJ. Will it run faster or slower?
 
 - Can we compile to CIL (.NET) via IKVM, then to native code (Mono or Microsoft's compilers). 
   Will it go faster or slower?
