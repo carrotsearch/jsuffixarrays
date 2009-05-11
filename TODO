@@ -3,7 +3,7 @@ Performance tests:
 
 - Add time-on-alphabet-size charts [fixed input size, varying alphabet]
 
-- Add memory-on-random-input (same script, different Y column for the chart).
+- See what's wrong with SAIS memory logging (aspect is wrong, most likely).
 
 - Add speed on various JVMs [fixed input, fixed alphabet, varying JVM]
 
