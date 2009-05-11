@@ -45,7 +45,9 @@
 	</target>
 
 	<target name="clean" description="Clean all intermediate files.">
-		<delete dir="tmp" />
+		<delete dir="tmp">
+			<exclude name="eclipse/**" />
+		</delete>
 	</target>
 
 	<target name="compile" depends="compile.code, compile.tests" description="Compile tests and code." />
