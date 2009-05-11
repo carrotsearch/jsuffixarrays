@@ -61,8 +61,9 @@ public class TimeOnRandomInput
     @Option(aliases =
     {
         "--extra-cells"
-    }, metaVar = "int", name = "-e", required = false, usage = "Extra allocated input cells")
-    public int extraCells = DeepShallow.overshoot;
+    }, metaVar = "int", name = "-e", required = false, usage = "Extra allocated input cells (default: "
+        + SuffixArrays.MAX_EXTRA_TRAILING_SPACE + ")")
+    public int extraCells = SuffixArrays.MAX_EXTRA_TRAILING_SPACE;
 
     @Option(aliases =
     {

@@ -72,9 +72,12 @@ public class DeepShallow implements ISuffixArrayBuilder
     // TODO: We should comply with Java naming conventions (refactoring of constants and fields is needed).
 
     /**
-     * TODO: magic constant?
+     * TODO: What is this magic constant? Do not make it public and do not reuse it
+     * anywhere where it isn't needed (especially not in the tests). If this algorithm has
+     * special considerations, we can run algorithm-specific tests with an appropriate
+     * decorator.
      */
-    public final static int overshoot = 575;
+    final static int overshoot = 575;
 
     private final static int SETMASK = 1 << 30;
     private final static int CLEARMASK = ~SETMASK;
@@ -140,8 +143,12 @@ public class DeepShallow implements ISuffixArrayBuilder
     {
         Tools.assertAlways(start == 0, "start index is not zero");
 
+        // TODO: add assertion comments here.
         Tools.assertAlways(overshoot == Shallow_limit + Cmp_overshoot + 9, "");
-        Tools.assertAlways(input.length >= start + length + overshoot, "");
+        Tools.assertAlways(input.length >= start + length + overshoot, 
+            "Input array length must have a trailing space of at least " 
+            + overshoot + " bytes.");
+
         MinMax mm = Tools.minmax(input, start, length);
         assertAlways(mm.min >= 0, "input must not be negative");
         assertAlways(mm.max < 256, "max alphabet size is 256");

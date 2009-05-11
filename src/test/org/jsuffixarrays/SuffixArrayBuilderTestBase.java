@@ -64,17 +64,18 @@ public abstract class SuffixArrayBuilderTestBase
         final ISuffixArrayBuilder builder = getInstance();
 
         final int sliceSize = 500;
-        final int totalSize = 1000 + DeepShallow.overshoot;
+        final int totalSize = 1000;
+        final int extraSpace = SuffixArrays.MAX_EXTRA_TRAILING_SPACE;
 
         final Random rnd = new Random(0x11223344);
         final MinMax alphabet = new MinMax(1, 50);
 
         final int [] slice = generateRandom(rnd, sliceSize, alphabet);
-        final int [] total = generateRandom(rnd, totalSize, alphabet);
+        final int [] total = generateRandom(rnd, totalSize + extraSpace, alphabet);
 
         int [] prevSuffixArray = null;
         int [] prevLCP = null;
-        for (int i = 0; i < totalSize - slice.length - DeepShallow.overshoot; i++)
+        for (int i = 0; i < totalSize - slice.length; i++)
         {
             int [] input = total.clone();
             System.arraycopy(slice, 0, input, i, slice.length);
@@ -110,7 +111,7 @@ public abstract class SuffixArrayBuilderTestBase
 
         // Use constant seed so that we can repeat tests.
         final Random rnd = new Random(0x11223344);
-        final int inputSize = 1000 + DeepShallow.overshoot;
+        final int inputSize = 1000;
         final int repeats = 500;
 
         runRandom(builder, rnd, inputSize, repeats, smallAlphabet);
@@ -126,7 +127,7 @@ public abstract class SuffixArrayBuilderTestBase
 
         // Use constant seed so that we can repeat tests.
         final Random rnd = new Random(0x11223344);
-        final int inputSize = 1000 + DeepShallow.overshoot;
+        final int inputSize = 1000;
         final int repeats = 500;
 
         runRandom(builder, rnd, inputSize, repeats, largeAlphabet);
@@ -138,17 +139,18 @@ public abstract class SuffixArrayBuilderTestBase
     private void runRandom(final ISuffixArrayBuilder builder, final Random rnd,
         final int inputSize, final int repeats, final MinMax alphabet)
     {
+        final int extraSpace = SuffixArrays.MAX_EXTRA_TRAILING_SPACE;
         for (int i = 0; i < repeats; i++)
         {
-            final int [] input = generateRandom(rnd, inputSize, alphabet);
+            final int [] input = generateRandom(rnd, 
+                inputSize + extraSpace, alphabet);
             final int [] copy = input.clone();
 
             final int start = 0;
-            final int length = input.length - DeepShallow.overshoot;
-            final int [] SA = builder.buildSuffixArray(input, start, length);
+            final int [] SA = builder.buildSuffixArray(input, start, inputSize);
             Assert.assertArrayEquals(input, copy);
-            assertPermutation(SA, length);
-            assertSorted(SA, input, length);
+            assertPermutation(SA, inputSize);
+            assertSorted(SA, input, inputSize);
         }
     }
 

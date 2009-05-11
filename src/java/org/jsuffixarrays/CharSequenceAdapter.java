@@ -37,7 +37,7 @@ final class CharSequenceAdapter
          * we don't want to waste space for multiple symbol mappings.
          */
 
-        this.input = new int [sequence.length() + DeepShallow.overshoot];
+        this.input = new int [sequence.length() + SuffixArrays.MAX_EXTRA_TRAILING_SPACE];
         for (int i = sequence.length() - 1; i >= 0; i--)
         {
             input[i] = sequence.charAt(i);

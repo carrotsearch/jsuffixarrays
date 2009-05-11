@@ -28,6 +28,14 @@ import com.google.common.collect.PrimitiveArrays;
  */
 public final class SuffixArrays
 {
+    /**
+     * Maximum required trailing space in the input array (certain algorithms need it). 
+     */
+    final static int MAX_EXTRA_TRAILING_SPACE = DeepShallow.overshoot; 
+
+    /*
+     * 
+     */
     private SuffixArrays()
     {
         // no instances.
