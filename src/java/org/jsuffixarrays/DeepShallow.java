@@ -8,7 +8,8 @@ import java.util.Arrays;
 /*
  * [MN]
  * how to recreate this strange behaviour:
- * 1. use System.arraycopy to create Text array (size = length + overshoot, copy input from start) __OR__ replace all occurences of Text[ with Text[start + 
+ * 1. use System.arraycopy to create Text array (size = length + overshoot, 
+ * copy input from start) __OR__ replace all occurences of Text[ with Text[start + 
  * 2. delete code from DeepShallowTest that ignores sameResultWithArraySlice()
  * 3. make sure that line Tools.assertAlways(start == 0, "start index is not zero"); in buildSuffixArray is uncommented
  * 4. run tests -- only sameResultWithArraySlice() should fail
@@ -17,6 +18,20 @@ import java.util.Arrays;
  * ???
  * 
  * I tried reseting all fields of this class at the start of buildSuffixArray, but it didn't help.
+ */
+
+/*
+ * [DW]
+ * I don't see how this algorithm (or rather implementation) can work for start != 0 
+ * -- everything seems to require that
+ * start == 0, for example this: 
+ * 
+ * for (int i = length; i < length + overshoot; i++)
+ * {
+ *    Text[i] = 0;
+ * }
+ *
+ * will cause invalid indexes to be cleared in the original array.
  */
 
 /**
@@ -35,8 +50,8 @@ public class DeepShallow implements ISuffixArrayBuilder
 {
     private static class SplitGroupResult
     {
-        int equal;
-        int lower;
+        final int equal;
+        final int lower;
 
         public SplitGroupResult(int equal, int lower)
         {
@@ -53,6 +68,8 @@ public class DeepShallow implements ISuffixArrayBuilder
         int downInt;
         Node right;
     }
+
+    // TODO: We should comply with Java naming conventions (refactoring of constants and fields is needed).
 
     /**
      * TODO: magic constant?
@@ -88,9 +105,7 @@ public class DeepShallow implements ISuffixArrayBuilder
     private int Cmp_done;
 
     private int Aux;
-
     private int Aux_written;
-
     private int Stack_size;
 
     private Node [] Stack;
@@ -123,8 +138,8 @@ public class DeepShallow implements ISuffixArrayBuilder
     @Override
     public int [] buildSuffixArray(int [] input, int start, int length)
     {
-
         Tools.assertAlways(start == 0, "start index is not zero");
+
         Tools.assertAlways(overshoot == Shallow_limit + Cmp_overshoot + 9, "");
         Tools.assertAlways(input.length >= start + length + overshoot, "");
         MinMax mm = Tools.minmax(input, start, length);
