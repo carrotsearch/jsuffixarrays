@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 
 /**
- * Tests for {@link Mori}.
+ * Tests for {@link SAIS}.
  */
 public class SAISTest extends SuffixArrayBuilderTestBase {
     @Before

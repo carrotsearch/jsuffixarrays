@@ -37,8 +37,6 @@ public class SkewTest extends SuffixArrayBuilderTestBase
     /**
      * Run a simple test that compares the output of this routine against the original
      * Karkkainen and Sanders code (<code>tryall.C</code>).
-     * 
-     * @see TryAll
      */
     @Test
     @SuppressWarnings("unchecked")

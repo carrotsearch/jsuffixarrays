@@ -5,7 +5,7 @@ import org.junit.Before;
 /**
  * Tests for {@link NaiveSort}.
  */
-public class NaiveSort2Test extends SuffixArrayBuilderTestBase
+public class NaiveSortTest extends SuffixArrayBuilderTestBase
 {
     @Before
     public void setupForConstraints() 
