@@ -33,7 +33,7 @@ import java.util.Arrays;
  */
 public class DeepShallow implements ISuffixArrayBuilder
 {
-    class SplitGroupResult
+    private static class SplitGroupResult
     {
         int equal;
         int lower;
@@ -45,7 +45,7 @@ public class DeepShallow implements ISuffixArrayBuilder
         }
     }
 
-    class Node
+    private static class Node
     {
         int skip;
         int key;
