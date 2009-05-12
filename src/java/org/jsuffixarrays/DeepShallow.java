@@ -108,7 +108,7 @@ public class DeepShallow implements ISuffixArrayBuilder
     private Node [] stack;
     private final boolean preserveInput;
     private int start;
-
+    
     public DeepShallow()
     {
         preserveInput = true;
@@ -129,19 +129,11 @@ public class DeepShallow implements ISuffixArrayBuilder
      * <li><code>input.length</code> &gt;=
      * <code>start + length + {@link #OVERSHOOT}</code></li>
      * <li>length >= 2</li>
-     * <li>start == 0</li>
      * </ul>
      */
     @Override
     public int [] buildSuffixArray(int [] input, int start, int length)
     {
-        // TODO: commenting this line will cause tests on random input to fail
-        Tools.assertAlways(start == 0, "start index is not zero");
-
-        // [MN] this assertion isn't really necessay here - it checks value of constants,
-        // and I think it makes little sense to check them everytime
-        // Tools.assertAlways(OVERSHOOT == SHALLOW_LIMIT + CMP_OVERSHOOT + 9, "");
-
         Tools.assertAlways(input.length >= start + length, "Input array is too short");
 
         MinMax mm = Tools.minmax(input, start, length);

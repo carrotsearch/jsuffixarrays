@@ -7,7 +7,6 @@ import org.junit.Before;
  */
 public class DeepShallowTest extends SuffixArrayBuilderTestBase
 {
-
     @Before
     public void setupForConstraints()
     {
@@ -24,12 +23,4 @@ public class DeepShallowTest extends SuffixArrayBuilderTestBase
         return new DeepShallow();
 
     }
-
-    // @Override
-    // @Ignore
-    // public void sameResultWithArraySlice()
-    // {
-    // // Ignore this test, DivSufSort require start == 0
-    // }
-
 }
