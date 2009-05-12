@@ -175,5 +175,16 @@ aspect DeepShallowMemLogger extends MemoryLogger
     pointcut excludedMethods(): execution(private * *(..));
 }
     
+/**
+ * Track memory in {@link SAIS} algorithm.
+ */
+aspect SaisMemLogger extends MemoryLogger
+{
+    @Override
+    pointcut tracedClasses() : within(SAIS) && !within(org.jsuffixarrays.SAIS..*);
+    @Override
+    pointcut excludedMethods(): execution(private * *(..));
+}
+    
 
 

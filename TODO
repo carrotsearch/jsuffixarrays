@@ -3,8 +3,6 @@ Performance tests:
 
 - Add time-on-alphabet-size charts [fixed input size, varying alphabet]
 
-- See what's wrong with SAIS memory logging (aspect is wrong, most likely).
-
 - Add speed on various JVMs [fixed input, fixed alphabet, varying JVM]
 
 - Tests should perform an average of N samples for each input configuration
