@@ -4,10 +4,14 @@ import static org.jsuffixarrays.Tools.assertAlways;
 
 /**
  * <p>
- * Straightforward reimplementation of the qsufsort algorithm given in: <pre><code>
+ * Straightforward reimplementation of the qsufsort algorithm given in:
+ * 
+ * <pre>
+ * &lt;code&gt;
  * Larsson, N. Jesper and Sadakane, Kunihiko. Faster Suffix Sorting. 
- * Report number LU-CS-TR:99-214, LUNDFD6/(NFCS-3140)/1--20/(1999). Department of Computer Science, Lund University"
- * </code></pre>
+ * Report number LU-CS-TR:99-214, LUNDFD6/(NFCS-3140)/1--20/(1999). Department of Computer Science, Lund University&quot;
+ * &lt;/code&gt;
+ * </pre>
  * <p>
  * This implementation is basically a translation of the C version given by Peter Sanders:
  * <tt>http://www.mpi-inf.mpg.de/~sanders/programs/suffix/</tt>
@@ -40,8 +44,8 @@ public class QSufSort implements ISuffixArrayBuilder
     private int start;
 
     /**
-     * Default constructor, uses the input array of symbols to preserve memory (and destroys
-     * it). 
+     * Default constructor, uses the input array of symbols to preserve memory (and
+     * destroys it).
      */
     public QSufSort()
     {
@@ -49,8 +53,8 @@ public class QSufSort implements ISuffixArrayBuilder
     }
 
     /**
-     * If <code>true</code>, the algorithm will use a copy of the 
-     * input so it is left intact.
+     * If <code>true</code>, the algorithm will use a copy of the input so it is left
+     * intact.
      */
     public QSufSort(boolean preserveInput)
     {
@@ -77,7 +81,9 @@ public class QSufSort implements ISuffixArrayBuilder
         this.start = start;
         if (preserveInput)
         {
-            V = input.clone();
+            V = new int [length + 1];
+            this.start = 0;
+            System.arraycopy(input, start, V, 0, length);
         }
         else
         {
