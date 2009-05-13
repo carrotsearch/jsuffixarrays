@@ -134,10 +134,12 @@ aspect NaiveSortMemLogger extends MemoryLogger
  */
 aspect DivSufSortMemLogger extends MemoryLogger
 {
-    /* 3 methods using stack are excluded, because they use max. 64 * 4 bytes of extra memory for stack */
-    // TODO: somehow exclude TRBudget class; within(DivSufSort && !DivSufSort.TRBudget) does not work);
+    /* 
+     * 3 private methods using stack are excluded, 
+     * because they use max. 64 * 4 bytes of extra memory for stack.
+     */
     @Override
-    pointcut tracedClasses(): within(DivSufSort);
+    pointcut tracedClasses(): within(DivSufSort) && !within(org.jsuffixarrays.DivSufSort..*);
     @Override
     pointcut excludedMethods(): execution(private * *(..)) ;
 }
