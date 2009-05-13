@@ -1,0 +1,20 @@
+
+#
+# Which algorithms to test?
+#
+ALGORITHMS="NS SKEW DIVSUFSORT SAIS BPR DEEP_SHALLOW QSUFSORT"
+
+
+#
+# Set paths to the following respective JVMs (the base installation folder, examples below).
+#
+
+# (required default)
+JAVA_SUN=/home/dweiss/Applications/java/jdk1.6.0
+
+# (optional)
+JAVA_IBM=/home/dweiss/Applications/java/ibm-jdk1.6_2.0
+JAVA_JROCKIT=/home/dweiss/Applications/java/jrockit-R27.5.0-jdk1.6.0_03
+JAVA_HARMONY=/home/dweiss/Applications/java/harmony-jdk-713673
+
+

@@ -159,11 +159,19 @@ public abstract class SuffixArrayBuilderTestBase
     public static int [] generateRandom(Random rnd, int size, MinMax alphabet)
     {
         final int [] input = new int [size];
+        fillRandom(rnd, input, size, alphabet);
+        return input;
+    }
+
+    /*
+     * Fill an array with random symbols from the given alphabet/
+     */
+    public static void fillRandom(Random rnd, int [] input, int size, MinMax alphabet)
+    {
         for (int j = 0; j < input.length; j++)
         {
             input[j] = rnd.nextInt(alphabet.range() + 1) + alphabet.min;
         }
-        return input;
     }
 
     /*

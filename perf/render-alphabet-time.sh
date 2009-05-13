@@ -23,14 +23,14 @@ cat >.tmp.gnuplot <<EOF
     set datafile missing "-"
     set grid
 
-    set key top left Left reverse
+    set key top right reverse
 
     set xtics border nomirror
     set ytics border nomirror
     set tics scale 1.0
 
-    set title "time on random input"
-    set xlabel "input size [millions elements]"
+    set title "time on constant input, varying alphabet"
+    set xlabel "alphabet size [symbols]"
     set ylabel "time [s]"
 
     set output "${OUTPUT_FILE}.eps"
@@ -48,8 +48,8 @@ for file in `find ${INPUT_DIR} -name "*.log" -print | sort`; do
 name=`basename $file .log | tr _ -` 
 cat >>.tmp.gnuplot <<EOF
     "$file" \\
-	   using (\$2 / 1000000):(\$1 >= 0 ? \$3 : 1/0) t ""       with lines ls 1, \\
-	"" using (\$2 / 1000000):(\$1 >= 0 ? \$3 : 1/0) t "$name"  with points lc rgb "#000000",     \\
+	   using (\$2):(\$1 >= 0 ? \$3 : 1/0) t ""       with lines ls 1, \\
+	"" using (\$2):(\$1 >= 0 ? \$3 : 1/0) t "$name"  with points lc rgb "#000000",     \\
 EOF
 done
 echo -e '"" using 1:(1/0) t ""\n\n' >> .tmp.gnuplot

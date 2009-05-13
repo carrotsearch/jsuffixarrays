@@ -1,122 +1,122 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <project basedir="." default="all" name="thesis-code">
-	<property name="junit.output.dir" location="tmp/junit" />
-	<property name="compiled.classes.dir" location="tmp/build/classes" />
-	<property name="compiled.tests.dir" location="tmp/build/test" />
+    <property name="junit.output.dir" location="tmp/junit" />
+    <property name="compiled.classes.dir" location="tmp/build/classes" />
+    <property name="compiled.tests.dir" location="tmp/build/test" />
 
-	<path id="tests.classpath">
-		<fileset dir="lib">
-			<include name="junit.jar" />
-			<include name="aspectj*.jar" />
-			<include name="args4j*.jar" />
-			<include name="*slf4j*.jar" />
-			<include name="log4j*.jar" />
-		</fileset>
-	</path>
+    <path id="tests.classpath">
+        <fileset dir="lib">
+            <include name="junit.jar" />
+            <include name="aspectj*.jar" />
+            <include name="args4j*.jar" />
+            <include name="*slf4j*.jar" />
+            <include name="log4j*.jar" />
+        </fileset>
+    </path>
 
-	<path id="compilation.classpath">
-		<fileset dir="lib">
-			<include name="*.jar" />
-			<exclude name="junit.jar" />
-			<exclude name="aspectj*.jar" />
-			<exclude name="args4j*.jar" />
-			<exclude name="*slf4j*.jar" />
-		</fileset>
-	</path>
+    <path id="compilation.classpath">
+        <fileset dir="lib">
+            <include name="*.jar" />
+            <exclude name="junit.jar" />
+            <exclude name="aspectj*.jar" />
+            <exclude name="args4j*.jar" />
+            <exclude name="*slf4j*.jar" />
+        </fileset>
+    </path>
 
-	<taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
-		<classpath refid="tests.classpath" />
-	</taskdef>
+    <taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
+        <classpath refid="tests.classpath" />
+    </taskdef>
 
-	<!-- Compilation presets. -->
-	<presetdef name="javac">
-		<javac deprecation="true" debug="true" 
-			target="1.6" source="1.6" encoding="UTF-8" includeantruntime="false" optimize="true" />
-	</presetdef>
+    <!-- Compilation presets. -->
+    <presetdef name="javac">
+        <javac deprecation="true" debug="true" 
+            target="1.6" source="1.6" encoding="UTF-8" includeantruntime="false" optimize="true" />
+    </presetdef>
 
-	<!-- -->
-	<presetdef name="iajc">
-		<iajc target="1.6" source="1.6" encoding="UTF-8" />
-	</presetdef>
+    <!-- -->
+    <presetdef name="iajc">
+        <iajc target="1.6" source="1.6" encoding="UTF-8" />
+    </presetdef>
 
-	<!-- -->
-	<target name="init">
-		<mkdir dir="${compiled.tests.dir}" />
-		<mkdir dir="${compiled.classes.dir}" />
-	</target>
+    <!-- -->
+    <target name="init">
+        <mkdir dir="${compiled.tests.dir}" />
+        <mkdir dir="${compiled.classes.dir}" />
+    </target>
 
-	<!-- -->
-	<target name="clean" description="Clean all intermediate files.">
-		<delete dir="tmp">
-			<exclude name="eclipse/**" />
-		</delete>
-	</target>
+    <!-- -->
+    <target name="clean" description="Clean all intermediate files.">
+        <delete dir="tmp">
+            <exclude name="eclipse/**" />
+        </delete>
+    </target>
 
-	<!-- -->
-	<target name="compile" depends="compile.code, compile.tests" description="Compile tests and code." />
+    <!-- -->
+    <target name="compile" depends="compile.code, compile.tests, cp" description="Compile tests and code." />
 
-	<!-- -->
-	<target name="compile.tests" depends="init">
-		<iajc destDir="${compiled.tests.dir}" incremental="false">
-			<sourceroots>
-				<pathelement location="src/test" />
-				<pathelement location="src/perf" />
-			</sourceroots>
+    <!-- -->
+    <target name="compile.tests" depends="init">
+        <iajc destDir="${compiled.tests.dir}" incremental="false">
+            <sourceroots>
+                <pathelement location="src/test" />
+                <pathelement location="src/perf" />
+            </sourceroots>
 
-			<inpath location="${compiled.classes.dir}" />
-			<classpath refid="tests.classpath" />
-			<classpath refid="compilation.classpath" />
-		</iajc>
+            <inpath location="${compiled.classes.dir}" />
+            <classpath refid="tests.classpath" />
+            <classpath refid="compilation.classpath" />
+        </iajc>
 
-		<copy includeemptydirs="false" todir="${compiled.tests.dir}">
-			<fileset dir="src/test">
-				<exclude name="**/*.java" />
-				<exclude name="**/*.aj" />
-			</fileset>
-			<fileset dir="src/perf" excludes="**/*.java" />
-		</copy>
-	</target>
+        <copy includeemptydirs="false" todir="${compiled.tests.dir}">
+            <fileset dir="src/test">
+                <exclude name="**/*.java" />
+                <exclude name="**/*.aj" />
+            </fileset>
+            <fileset dir="src/perf" excludes="**/*.java" />
+        </copy>
+    </target>
 
-	<!-- -->
-	<target name="compile.code" depends="init">
-		<echo message="${ant.project.name}: ${ant.file}" />
+    <!-- -->
+    <target name="compile.code" depends="init">
+        <echo message="${ant.project.name}: ${ant.file}" />
 
-		<javac destdir="${compiled.classes.dir}">
-			<src path="src/java" />
-			<classpath refid="compilation.classpath" />
-		</javac>
+        <javac destdir="${compiled.classes.dir}">
+            <src path="src/java" />
+            <classpath refid="compilation.classpath" />
+        </javac>
 
-		<copy includeemptydirs="false" todir="${compiled.classes.dir}">
-			<fileset dir="src/java" excludes="**/*.java" />
-		</copy>
-	</target>
+        <copy includeemptydirs="false" todir="${compiled.classes.dir}">
+            <fileset dir="src/java" excludes="**/*.java" />
+        </copy>
+    </target>
 
-	<!-- -->
-	<target name="test" depends="compile" description="Run JUnit tests.">
-		<mkdir dir="${junit.output.dir}" />
+    <!-- -->
+    <target name="test" depends="compile" description="Run JUnit tests.">
+        <mkdir dir="${junit.output.dir}" />
 
-		<junit fork="yes" printsummary="withOutAndErr">
-			<formatter type="xml" />
-			<batchtest fork="yes" todir="${junit.output.dir}">
-				<fileset dir="src/test">
-					<include name="**/*Test.java" />
-				</fileset>
-			</batchtest>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml" />
+            <batchtest fork="yes" todir="${junit.output.dir}">
+                <fileset dir="src/test">
+                    <include name="**/*Test.java" />
+                </fileset>
+            </batchtest>
 
-			<classpath refid="compilation.classpath" />
-			<classpath refid="tests.classpath" />
-			<classpath location="${compiled.classes.dir}" />
-			<classpath location="${compiled.tests.dir}" />
-		</junit>
+            <classpath refid="compilation.classpath" />
+            <classpath refid="tests.classpath" />
+            <classpath location="${compiled.classes.dir}" />
+            <classpath location="${compiled.tests.dir}" />
+        </junit>
 
-		<junitreport todir="${junit.output.dir}">
-			<fileset dir="${junit.output.dir}">
-				<include name="TEST-*.xml" />
-			</fileset>
-			<report format="frames" todir="${junit.output.dir}" />
-		</junitreport>
-	</target>
+        <junitreport todir="${junit.output.dir}">
+            <fileset dir="${junit.output.dir}">
+                <include name="TEST-*.xml" />
+            </fileset>
+            <report format="frames" todir="${junit.output.dir}" />
+        </junitreport>
+    </target>
 
     <!-- -->
     <target name="cp" description="Emit classpath required to run performance tests.">
@@ -124,17 +124,17 @@
         For performance tests, tests classpath comes first, so that
         instrumented classes are read before original classes.
         -->
-    	<pathconvert property="perf.classpath">
-    		<path refid="compilation.classpath" />
-    		<path refid="tests.classpath" />
-    	    <path location="${compiled.tests.dir}" />
-    	    <path location="${compiled.classes.dir}" />
-    	</pathconvert>
+        <pathconvert property="perf.classpath">
+            <path refid="compilation.classpath" />
+            <path refid="tests.classpath" />
+            <path location="${compiled.tests.dir}" />
+            <path location="${compiled.classes.dir}" />
+        </pathconvert>
 
-    	<echo file="tmp/perf.classpath">${perf.classpath}</echo>
+        <echo file="tmp/perf.classpath">${perf.classpath}</echo>
     </target>
 
-	<!-- -->
-	<target name="all" depends="compile, test, cp">
-	</target>
+    <!-- -->
+    <target name="all" depends="compile, test, cp">
+    </target>
 </project>

@@ -14,11 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Measure time taken to build a suffix array on random, but increasing input.
+ * Measure time taken to build a suffix array on random input of constant size, but with
+ * varying alphabet (LCP).
  */
-public class TimeOnRandomInput
+public class TimeOnAlphabetSize
 {
-    private final Logger logger = LoggerFactory.getLogger(TimeOnRandomInput.class);
+    private final Logger logger = LoggerFactory.getLogger(TimeOnAlphabetSize.class);
 
     @Option(aliases =
     {
@@ -28,15 +29,15 @@ public class TimeOnRandomInput
 
     @Option(aliases =
     {
-        "--start-size"
-    }, metaVar = "int", name = "-s", required = false, usage = "start from input size")
-    public int startSize = 100000;
+        "--start-alphabet"
+    }, metaVar = "int", name = "-s", required = false, usage = "starting alphabet size")
+    public int startAlphabet = 1;
 
     @Option(aliases =
     {
         "--increment"
-    }, metaVar = "int", name = "-i", required = false, usage = "Input size increment")
-    public int increment = 100000;
+    }, metaVar = "int", name = "-i", required = false, usage = "Alphabet size increment")
+    public int increment = 1;
 
     @Option(aliases =
     {
@@ -65,9 +66,9 @@ public class TimeOnRandomInput
 
     @Option(aliases =
     {
-        "--alphabet-size"
-    }, metaVar = "int", name = "-a", required = false, usage = "Alphabet size (>= 1)")
-    public int alphabetSize = 100;
+        "--input-size"
+    }, metaVar = "int", name = "-a", required = false, usage = "Input size (>= 1)")
+    public int inputSize = 1000000;
 
     @Option(aliases =
     {
@@ -83,13 +84,12 @@ public class TimeOnRandomInput
      */
     private void run() throws IOException
     {
-        Tools.assertAlways(alphabetSize >= 1, "alphabet size must be >= 1");
-        Tools.assertAlways(startSize > 0, "start must be > 0");
+        Tools.assertAlways(inputSize >= 1, "alphabet size must be >= 1");
+        Tools.assertAlways(startAlphabet > 0, "start must be > 0");
         Tools.assertAlways(increment >= 0, "increment must be >= 0");
         Tools.assertAlways(extraCells >= 0, "extra cells must be >= 0");
 
         final Random rnd = new Random(randomSeed);
-        final MinMax alphabet = new MinMax(1, alphabetSize);
 
         PrintStream out = System.out;
         if (output != null)
@@ -104,10 +104,11 @@ public class TimeOnRandomInput
          * Calculate random input for the maximum size we will run on. Turns out random
          * number generator is slower than suffix array computation in most cases...
          */
-        final int maxSize = startSize + (rounds * increment);
         final Runtime rt = Runtime.getRuntime();
 
-        logger.info("Algorithm: " + algorithm + ", alphabet: " + alphabetSize
+        logger.info("Algorithm: " + algorithm + ", alphabet: " + startAlphabet
+            + "-" + (startAlphabet + rounds * increment)
+            + ", input size: " + inputSize
             + ", extraCells: " + extraCells + ", seed: " + randomSeed);
 
         logger.info("Time: " + new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
@@ -120,23 +121,25 @@ public class TimeOnRandomInput
         logger.info("OS version: " + SystemUtils.OS_VERSION);
         logger.info("JVM max memory: " + rt.maxMemory());
 
-        logger.info("Allocating random input: " + maxSize + " bytes.");
-        final int [] input = SuffixArrayBuilderTestBase.generateRandom(rnd, maxSize
-            + extraCells, alphabet);
+        logger.info("Allocating random input: " + inputSize + " bytes.");
+        final int [] input = new int [inputSize + extraCells];
 
         out.println(String.format(Locale.US, "# %4s " + "%8s " + "%7s " + "%7s " + "%5s  "
-            + "%s", "rnd", "size", "time", "mem(MB)", "av.lcp", "status"));
+            + "%s", "rnd", "alph.size", "time", "mem(MB)", "av.lcp", "status"));
 
         /*
          * Run the test. Warmup rounds have negative round numbers.
          */
         final ISuffixArrayBuilder builder = algorithm.getInstance();
-        int size = startSize;
+        int size = startAlphabet;
         for (int round = -warmup; round < rounds; round++)
         {
             for (int sample = 0; sample < samples; sample++) {
                 MemoryLogger.reset();
-    
+
+                final MinMax alphabet = new MinMax(1, size);
+                SuffixArrayBuilderTestBase.fillRandom(rnd, input, inputSize, alphabet);
+
                 // Run the test.
                 final long startTime = System.currentTimeMillis();
                 final long endTime;
@@ -144,12 +147,12 @@ public class TimeOnRandomInput
                 double averageLCP = 0;
                 try
                 {
-                    final int [] sa = builder.buildSuffixArray(input, 0, size);
-                    final int [] lcp = SuffixArrays.computeLCP(input, 0, size, sa);
+                    final int [] sa = builder.buildSuffixArray(input, 0, inputSize);
+                    final int [] lcp = SuffixArrays.computeLCP(input, 0, inputSize, sa);
                     long prefixesLen = 0;
-                    for (int i = 0; i < size; i++)
+                    for (int i = 0; i < inputSize; i++)
                         prefixesLen += lcp[i];
-                    averageLCP = prefixesLen / (double) size;
+                    averageLCP = prefixesLen / (double) inputSize;
                 }
                 catch (OutOfMemoryError t)
                 {
@@ -187,7 +190,7 @@ public class TimeOnRandomInput
      */
     public static void main(String [] args) throws Exception
     {
-        final TimeOnRandomInput launcher = new TimeOnRandomInput();
+        final TimeOnAlphabetSize launcher = new TimeOnAlphabetSize();
         final CmdLineParser parser = new CmdLineParser(launcher);
         parser.setUsageWidth(80);
 

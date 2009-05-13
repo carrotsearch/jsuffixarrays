@@ -44,12 +44,12 @@ cat >.tmp.gnuplot <<EOF
 EOF
 
 export IFS=$'\n'
-for file in `find results/random-input -name "*.log" -print | sort`; do
+for file in `find ${INPUT_DIR} -name "*.log" -print | sort`; do
 name=`basename $file .log | tr _ -` 
 cat >>.tmp.gnuplot <<EOF
     "$file" \\
-	   using (\$2 / 1000000):(\$1 > 0 ? \$4 : 1/0) t ""       with lines ls 1, \\
-	"" using (\$2 / 1000000):(\$1 > 0 ? \$4 : 1/0) t "$name"  with points lc rgb "#000000",     \\
+	   using (\$2 / 1000000):(\$1 >= 0 ? \$4 : 1/0) t ""       with lines ls 1, \\
+	"" using (\$2 / 1000000):(\$1 >= 0 ? \$4 : 1/0) t "$name"  with points lc rgb "#000000",     \\
 EOF
 done
 echo -e '"" using 1:(1/0) t ""\n\n' >> .tmp.gnuplot
