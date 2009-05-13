@@ -1,11 +1,5 @@
 
 #
-# Which algorithms to test?
-#
-ALGORITHMS="NS SKEW DIVSUFSORT SAIS BPR DEEP_SHALLOW QSUFSORT"
-
-
-#
 # Set paths to the following respective JVMs (the base installation folder, examples below).
 #
 

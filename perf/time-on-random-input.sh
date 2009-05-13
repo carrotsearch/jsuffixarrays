@@ -8,6 +8,11 @@
 . ./setup.sh
 
 #
+# Which algorithms to test?
+#
+ALGORITHMS="NS SKEW DIVSUFSORT SAIS BPR DEEP_SHALLOW QSUFSORT"
+
+#
 # Run evaluations.
 #
 OUTPUT_DIR=results/random-input
