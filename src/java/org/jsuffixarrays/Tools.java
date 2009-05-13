@@ -91,7 +91,11 @@ final class Tools
     }
 
     /**
-     * Throw {@link AssertionError} if a condition is <code>false</code>.
+     * Throw {@link AssertionError} if a condition is <code>false</code>. This should
+     * be called when the assertion must be always verified (as in the case of verifying
+     * the algorithm's preconditions). For other, internal assertions, one should use 
+     * <code>assert</code> keyword so that such assertions can be disabled at run-time (for
+     * performance reasons).
      */
     static final void assertAlways(boolean condition, String msg)
     {
