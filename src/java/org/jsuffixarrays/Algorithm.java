@@ -42,6 +42,25 @@ public enum Algorithm
     }
 
     /**
+     * @return Same as {@link #getInstance()}, but returns the algorithm instance
+     * decorated to work with any range or distribution of input symbols (respecting
+     * each algorithm's constraints).   
+     */
+    public ISuffixArrayBuilder getDecoratedInstance()
+    {
+        switch (this)
+        {
+            case SKEW:
+                return new DensePositiveDecorator(
+                    new ExtraTrailingCellsDecorator(getInstance(), 
+                        SuffixArrays.MAX_EXTRA_TRAILING_SPACE));
+
+            default:
+                return getInstance();
+        }
+    }
+    
+    /**
      * @return Create and return an algorithm instance.
      */
     public ISuffixArrayBuilder getInstance()
@@ -50,10 +69,6 @@ public enum Algorithm
         {
             case SKEW:
                 return new Skew();
-
-            case SKEW_D:
-                return new NonNegativeCompactingDecorator(
-                    new ExtraCellsZeroIndexDecorator(new Skew(), 3));
 
             case NS:
                 return new NaiveSort();
@@ -76,20 +91,6 @@ public enum Algorithm
         }
 
         throw new RuntimeException("No algorithm for constant: " + this);
-    }
-
-    /**
-     * @return mapper for input read from file, or null if isn't needed.
-     */
-    public IMapper getMapper(int [] input, int start, int length)
-    {
-        switch (this)
-        {
-            // skew requires positive (>0) input
-            case SKEW:
-                return new PositiveMapper(input, start, length);
-        }
-        return null;
     }
 
     /**

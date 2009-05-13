@@ -99,13 +99,7 @@ public class TimeOnFile
             {
                 for (int i = 0; i < len; i++, pos++)
                 {
-                    input[pos] = buffer[i];
-                    // all original algorithms in C read bytes as unsigned chars
-                    // we simulate it here to have the same ranks of symbols in input
-                    if (input[pos] < 0)
-                    {
-                        input[pos] += 256;
-                    }
+                    input[pos] = ((int) buffer[i]) & 0xff;
                 }
             }
         }
@@ -114,12 +108,13 @@ public class TimeOnFile
             fis.close();
         }
 
+        /*
+         * We want the input to be identical (and acceptable) for all algorithms,
+         * without any special decorators.
+         */
         final int start = 0;
-        final IMapper mapper = algorithm.getMapper(input, start, size);
-        if (mapper != null)
-        {
-            mapper.map(input, start, size);
-        }
+        final ISymbolMapper mapper = new DensePositiveMapper(input, start, size);
+        mapper.map(input, start, size);
 
         out.println(String.format(Locale.US, "%4s " + "%7s " + "%7s " + "%7s " + "%5s  "
             + "%s", "rnd", "size", "time", "mem(MB)", "av.lcp", "status"));
@@ -162,8 +157,7 @@ public class TimeOnFile
                 endTime = System.currentTimeMillis();
             }
 
-            // round, input size, suffix building time, mem used (MB), avg.lcp,
-            // status
+            // round, input size, suffix building time, mem used (MB), avg.lcp, status
             final String result = String.format(Locale.US, "%4d " + "%7d " + "%7.3f "
                 + "%7.3f " + "%5.2f  " + "%s", round, size,
                 (endTime - startTime) / 1000.0d, MemoryLogger.getMemoryUsed()

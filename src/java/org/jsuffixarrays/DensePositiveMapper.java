@@ -5,7 +5,7 @@ package org.jsuffixarrays;
  * positive indexes) and their new key values. A "reverse" mapping is used to restore
  * original values in place of the mapped keys upon exit.
  */
-final class DensePositiveMapper implements IMapper
+final class DensePositiveMapper implements ISymbolMapper
 {
     private final int offset;
     private final int [] forward;

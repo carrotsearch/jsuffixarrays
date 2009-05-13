@@ -188,13 +188,13 @@ public final class Skew implements ISuffixArrayBuilder
      * adapters can be used in the following way:
      * 
      * <pre>
-     * return new {@link NonNegativeCompactingDecorator}(
-     *      new {@link ExtraCellsZeroIndexDecorator}(
+     * return new {@link DensePositiveDecorator}(
+     *      new {@link ExtraTrailingCellsDecorator}(
      *          new {@link Skew}(), 3));
      * </pre>
      * 
-     * @see ExtraCellsZeroIndexDecorator
-     * @see NonNegativeCompactingDecorator
+     * @see ExtraTrailingCellsDecorator
+     * @see DensePositiveDecorator
      */
     @Override
     public int [] buildSuffixArray(int [] input, int start, int length)

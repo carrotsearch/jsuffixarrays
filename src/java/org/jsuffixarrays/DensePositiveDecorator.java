@@ -2,18 +2,18 @@ package org.jsuffixarrays;
 
 /**
  * A decorator around {@link ISuffixArrayBuilder} that accepts any input symbols and maps
- * it to non-negative, compact alphabet. Relative symbols order is preserved (changes are
+ * it to non-negative, compact (dense) alphabet. Relative symbols order is preserved (changes are
  * limited to a constant shift and compaction of symbols). The input is remapped in-place,
  * but additional space is required for the mapping.
  */
-public final class NonNegativeCompactingDecorator implements ISuffixArrayBuilder
+public final class DensePositiveDecorator implements ISuffixArrayBuilder
 {
     private final ISuffixArrayBuilder delegate;
 
     /*
      * 
      */
-    public NonNegativeCompactingDecorator(ISuffixArrayBuilder delegate)
+    public DensePositiveDecorator(ISuffixArrayBuilder delegate)
     {
         this.delegate = delegate;
     }
@@ -26,7 +26,7 @@ public final class NonNegativeCompactingDecorator implements ISuffixArrayBuilder
     {
         final MinMax minmax = Tools.minmax(input, start, length);
 
-        final IMapper mapper;
+        final ISymbolMapper mapper;
         if (minmax.range() > 0x10000)
         {
             throw new RuntimeException("Large symbol space not implemented yet.");

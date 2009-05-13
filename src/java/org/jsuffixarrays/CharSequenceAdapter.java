@@ -20,7 +20,7 @@ final class CharSequenceAdapter
      * The suffix array builder should accept non-negative characters, with a possibly
      * large alphabet size.
      * 
-     * @see NonNegativeCompactingDecorator
+     * @see DensePositiveDecorator
      */
     public CharSequenceAdapter(ISuffixArrayBuilder builder)
     {
@@ -46,7 +46,7 @@ final class CharSequenceAdapter
         final int start = 0;
         final int length = sequence.length();
 
-        final IMapper mapper = new DensePositiveMapper(input, start, length);
+        final ISymbolMapper mapper = new DensePositiveMapper(input, start, length);
         mapper.map(input, start, length);
 
         return delegate.buildSuffixArray(input, start, length);

@@ -12,7 +12,7 @@ public class SkewWithDecoratorsTest extends SuffixArrayBuilderTestBase
     @Override
     protected ISuffixArrayBuilder getInstance()
     {
-        return new NonNegativeCompactingDecorator(
-            new ExtraCellsZeroIndexDecorator(new Skew(), 3));
+        return new DensePositiveDecorator(
+            new ExtraTrailingCellsDecorator(new Skew(), 3));
     }
 }

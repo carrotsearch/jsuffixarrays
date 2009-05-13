@@ -7,15 +7,15 @@ package org.jsuffixarrays;
  * <li>shifts the input to zero-based positions.</li>
  * </ul>
  */
-public final class ExtraCellsZeroIndexDecorator implements ISuffixArrayBuilder
+public final class ExtraTrailingCellsDecorator implements ISuffixArrayBuilder
 {
     private final ISuffixArrayBuilder delegate;
     private final int extraCells;
 
-    /*
-     * 
+    /**
+     * @see SuffixArrays#MAX_EXTRA_TRAILING_SPACE
      */
-    public ExtraCellsZeroIndexDecorator(ISuffixArrayBuilder delegate, int extraCells)
+    public ExtraTrailingCellsDecorator(ISuffixArrayBuilder delegate, int extraCells)
     {
         this.delegate = delegate;
         this.extraCells = extraCells;

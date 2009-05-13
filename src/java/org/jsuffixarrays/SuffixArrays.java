@@ -88,8 +88,8 @@ public final class SuffixArrays
      */
     public static SuffixData createWithLCP(int [] input, int start, int length)
     {
-        final ISuffixArrayBuilder builder = new NonNegativeCompactingDecorator(
-            new ExtraCellsZeroIndexDecorator(new Skew(), 3));
+        final ISuffixArrayBuilder builder = new DensePositiveDecorator(
+            new ExtraTrailingCellsDecorator(new Skew(), 3));
 
         return createWithLCP(input, start, length, builder);
     }
