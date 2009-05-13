@@ -108,7 +108,7 @@ public class DeepShallow implements ISuffixArrayBuilder
     private int start;
 
     /**
-     * If <code>true</code>, {@link #buildSuffixArray(int[], int, int)} uses copy of input
+     * If <code>true</code>, {@link #buildSuffixArray(int[], int, int)} uses a copy of the input
      * so it is left intact.
      */
     private final boolean preserveInput;
@@ -132,7 +132,8 @@ public class DeepShallow implements ISuffixArrayBuilder
      * <li>maximal symbol value &lt; <code>256</code></li>
      * <li><code>input.length</code> &ge; <code>start + length</code> if
      * {@link #preserveInput} is <tt>true</tt></li>
-     * <li><code>input.length</code> &ge; <code>start + length + {@link #OVERSHOOT}</code> if {@link #preserveInput} is
+     * <li><code>input.length</code> &ge; <code>start + length + {@link #OVERSHOOT}</code> 
+     * if {@link #preserveInput} is
      * <tt>false</tt></li>
      * <li>length >= 2</li>
      * </ul>
