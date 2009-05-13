@@ -187,9 +187,9 @@ aspect SaisMemLogger extends MemoryLogger
     
     @Override
     pointcut excludedMethods(): execution(private * *(..)) 
-        && !execution(private * SA_IS(..))
-        && !execution(private * induceSA(..));
+        && !execution(private * org.jsuffixarrays.SAIS.SA_IS(..))
+        && !execution(private * org.jsuffixarrays.SAIS.induceSA(..));
 }
-    
+
 
 
