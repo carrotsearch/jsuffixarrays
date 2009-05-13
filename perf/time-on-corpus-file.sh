@@ -53,11 +53,21 @@ for algorithm in $ALGORITHMS; do
         --rounds 5 --warmup-rounds 2 \
         $1 \
     2>$OUTPUT_DIR/$algorithm.err | tee $OUTPUT_DIR/$algorithm.log
+
+    # Remove empty logs.
+    if [ ! -s $OUTPUT_DIR/$algorithm.err ]; then
+        rm $OUTPUT_DIR/$algorithm.err
+    fi
+done
+
+# Collect averages. 
+rm -f $OUTPUT_DIR/averages
+for algorithm in $ALGORITHMS; do
+    ./avg-corpus-file.rb < $OUTPUT_DIR/$algorithm.log >> $OUTPUT_DIR/averages 
 done
 
 #
 # Render plots.
 #
 
-#./render-input-time.sh $OUTPUT_DIR results/random-input-time
-#./render-input-memory.sh $OUTPUT_DIR results/random-input-memory
+./render-corpus-file.sh $OUTPUT_DIR/averages $OUTPUT_DIR/averages-plot

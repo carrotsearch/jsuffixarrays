@@ -145,8 +145,9 @@ public class TimeOnFile
         }
         mapper.map(input, start, size);
 
-        out.println(String.format(Locale.US, "%4s " + "%7s " + "%7s " + "%7s " + "%5s  "
-            + "%s", "rnd", "size", "time", "mem(MB)", "av.lcp", "status"));
+        out.println(String.format(Locale.US, 
+            "%4s %7s %7s %7s %5s %s %s", 
+            "rnd", "size", "time", "mem(MB)", "av.lcp", "status", "algorithm"));
 
         /*
          * Run the test. Warmup rounds have negative round numbers.
@@ -189,10 +190,10 @@ public class TimeOnFile
             }
 
             // round, input size, suffix building time, mem used (MB), avg.lcp, status
-            final String result = String.format(Locale.US, "%4d " + "%7d " + "%7.3f "
-                + "%7.3f " + "%5.2f  " + "%s", round, size,
+            final String result = String.format(Locale.US, 
+                "%4d " + "%7d " + "%7.3f " + "%7.3f " + "%5.2f  " + "%s %s", round, size,
                 (endTime - startTime) / 1000.0d, MemoryLogger.getMemoryUsed()
-                    / (double) (1024 * 1024), averageLCP, status);
+                    / (double) (1024 * 1024), averageLCP, status, algorithm.toString());
             out.println(result);
 
         }
