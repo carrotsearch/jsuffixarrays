@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TimeOnRandomInput
 {
-    private final Logger logger = LoggerFactory.getLogger(TimeOnRandomInput.class);
+    private final Logger logger = LoggerFactory.getLogger("results");
 
     @Option(aliases =
     {

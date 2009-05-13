@@ -11,9 +11,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -26,7 +29,8 @@ import org.slf4j.LoggerFactory;
  */
 public class TimeOnFile
 {
-    private final Logger logger = LoggerFactory.getLogger(TimeOnRandomInput.class);
+    private final Logger logger = LoggerFactory.getLogger("results");
+    private final Logger errors = LoggerFactory.getLogger("errors");
 
     @Option(aliases =
     {
@@ -53,12 +57,25 @@ public class TimeOnFile
     }, metaVar = "file", name = "-o", required = false, usage = "Output file (if not given, stdout is used)")
     public File output;
 
-    @Argument(index = 0, required = true, usage = "Algorithm to test.")
+    @Argument(index = 0, required = true, metaVar = "algorithm", usage = "Algorithm to test (Algorithm class constant).")
     public Algorithm algorithm;
 
     @Argument(index = 1, required = true, usage = "Input data file.")
     public File inputFile;
 
+    private static final class IdentityMapper implements ISymbolMapper
+    {
+        public void map(int [] input, int start, int length)
+        {
+            // Do nothing.
+        }
+        
+        public void undo(int [] input, int start, int length)
+        {
+            // Do nothing.
+        }
+    }
+    
     /*
      * Run the performance test.
      */
@@ -80,10 +97,14 @@ public class TimeOnFile
         logger.info("Algorithm: " + algorithm + ", file: " + inputFile.getName()
             + ", extraCells: " + extraCells);
 
+        logger.info("Time: " + new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
         logger.info("JVM name: " + JAVA_VM_NAME);
         logger.info("JVM version: " + JAVA_VM_VERSION);
         logger.info("JVM info: " + JAVA_VM_INFO);
         logger.info("JVM vendor: " + JAVA_VM_VENDOR);
+        logger.info("OS arch: " + SystemUtils.OS_ARCH);
+        logger.info("OS name: " + SystemUtils.OS_NAME);
+        logger.info("OS version: " + SystemUtils.OS_VERSION);
         logger.info("JVM max memory: " + rt.maxMemory());
 
         final int size = (int) inputFile.length();
@@ -113,7 +134,15 @@ public class TimeOnFile
          * without any special decorators.
          */
         final int start = 0;
-        final ISymbolMapper mapper = new DensePositiveMapper(input, start, size);
+        final ISymbolMapper mapper;
+        switch (algorithm)
+        {
+            case SKEW:
+                mapper = new DensePositiveMapper(input, start, size);
+                break;
+            default:
+                mapper = new IdentityMapper();
+        }
         mapper.map(input, start, size);
 
         out.println(String.format(Locale.US, "%4s " + "%7s " + "%7s " + "%7s " + "%5s  "
@@ -147,10 +176,12 @@ public class TimeOnFile
             catch (OutOfMemoryError t)
             {
                 status = "oom";
+                errors.error("OutOfMemory: " + t.getMessage(), t);
             }
             catch (Throwable t)
             {
                 status = "err";
+                errors.error("Processing error: " + t.getMessage(), t);
             }
             finally
             {

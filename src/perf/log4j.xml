@@ -9,6 +9,18 @@
 	        <param name="ConversionPattern" value="# %m%n"/>
 	    </layout>
 	</appender>
+	
+    <appender  name="appender-stderr" class="org.apache.log4j.ConsoleAppender">
+        <param name="target" value="System.err" />
+
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="# %m%n"/>
+        </layout>
+    </appender>
+    
+    <logger name="errors" additivity="false">
+        <appender-ref ref="appender-stderr"/>
+    </logger>
 
     <root>
         <priority value="debug" />
