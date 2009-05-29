@@ -23,10 +23,13 @@ def avg(a)
 end
 
 def stddev(a)
-    a = (a.map {|e| e.to_f})
-
-    squares_sum = a.inject(0) {|sum,v| sum + v ** 2}
-    stddev = Math.sqrt((squares_sum - a.size * (avg(a) ** 2)) / (a.size - 1))
+   begin
+     a = (a.map {|e| e.to_f})
+     squares_sum = a.inject(0) {|sum,v| sum + v ** 2}
+     stddev = Math.sqrt((squares_sum - a.size * (avg(a) ** 2)) / (a.size - 1))
+   rescue 
+     return -1
+   end
 end
 
 puts "%.4f %.4f %s" % [avg(columns[2]), stddev(columns[2]), columns[6][0].gsub("_", "-")]

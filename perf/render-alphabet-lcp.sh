@@ -40,11 +40,12 @@ cat >.tmp.gnuplot <<EOF
 EOF
 
 export IFS=$'\n'
-for file in `find ${INPUT_DIR} -name "*.log" -print | sort`; do
+for file in `find ${INPUT_DIR} -name "*.avg.log" -print | sort`; do
+name=`basename $file .avg.log | tr _ -` 
 cat >>.tmp.gnuplot <<EOF
     "$file" \\
 	   using (\$2):(\$1 >= 0 ? \$5 : 1/0) t ""       with lines ls 1, \\
-	"" using (\$2):(\$1 >= 0 ? \$5 : 1/0) t ""       with points lc rgb "#000000",     \\
+	"" using (\$2):(\$1 >= 0 ? \$5 : 1/0) t "$name"       with points lc rgb "#000000",     \\
 EOF
 break
 done

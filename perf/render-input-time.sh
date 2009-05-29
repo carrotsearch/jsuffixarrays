@@ -44,8 +44,8 @@ cat >.tmp.gnuplot <<EOF
 EOF
 
 export IFS=$'\n'
-for file in `find ${INPUT_DIR} -name "*.log" -print | sort`; do
-name=`basename $file .log | tr _ -` 
+for file in `find ${INPUT_DIR} -name "*.avg.log" -print | sort`; do
+name=`basename $file .avg.log | tr _ -` 
 cat >>.tmp.gnuplot <<EOF
     "$file" \\
 	   using (\$2 / 1000000):(\$1 >= 0 ? \$3 : 1/0) t ""       with lines ls 1, \\
@@ -68,5 +68,5 @@ ps2eps -q --clip --ignoreBB --gsbbox | \
 gs -q -dNOPAUSE -dBATCH -dEPSCrop -dNOCACHE -dPDFSETTINGS=/printer -sPAPERSIZE=a4 \
     -dAutoRotatePages=/PageByPage -sDEVICE=pdfwrite -sOutputFile=${OUTPUT_FILE}.pdf - -c quit
 
-rm .tmp.gnuplot
+#rm .tmp.gnuplot
 

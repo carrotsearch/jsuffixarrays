@@ -10,7 +10,8 @@
 #
 # Which algorithms to test?
 #
-ALGORITHMS="NS SKEW DIVSUFSORT SAIS BPR DEEP_SHALLOW QSUFSORT"
+#ALGORITHMS="NS SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
+ALGORITHMS="DIVSUFSORT QSUFSORT"
 
 #
 # Run evaluations.
@@ -28,13 +29,21 @@ for algorithm in $ALGORITHMS; do
         $algorithm \
         --alphabet-size 32 \
         --start-size 1000000 --increment 1000000 \
-        --rounds 20 --warmup-rounds 2 --samples 1 \
+        --rounds 2 --warmup-rounds 0 --samples 3 \
     | tee $OUTPUT_DIR/$algorithm.log
 done
+
+#
+#compute statistics
+#
+for algorithm in $ALGORITHMS; do
+	./avg-random.rb < $OUTPUT_DIR/$algorithm.log > $OUTPUT_DIR/$algorithm.avg.log
+done
+
 
 #
 # Render plots.
 #
 
-./render-input-time.sh $OUTPUT_DIR results/random-input-time
-./render-input-memory.sh $OUTPUT_DIR results/random-input-memory
+#./render-input-time.sh  $OUTPUT_DIR results/random-input-time
+#./render-input-memory.sh $OUTPUT_DIR results/random-input-memory

@@ -44,8 +44,8 @@ cat >.tmp.gnuplot <<EOF
 EOF
 
 export IFS=$'\n'
-for file in `find ${INPUT_DIR} -name "*.log" -print | sort`; do
-name=`basename $file .log | tr _ -` 
+for file in `find ${INPUT_DIR} -name "*.avg.log" -print | sort`; do
+name=`basename $file .avg.log | tr _ -` 
 cat >>.tmp.gnuplot <<EOF
     "$file" \\
 	   using (\$2):(\$1 >= 0 ? \$3 : 1/0) t ""       with lines ls 1, \\

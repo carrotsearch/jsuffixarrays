@@ -1,15 +1,26 @@
 package org.jsuffixarrays;
 
-import static org.apache.commons.lang.SystemUtils.*;
+import static org.apache.commons.lang.SystemUtils.JAVA_VM_INFO;
+import static org.apache.commons.lang.SystemUtils.JAVA_VM_NAME;
+import static org.apache.commons.lang.SystemUtils.JAVA_VM_VENDOR;
+import static org.apache.commons.lang.SystemUtils.JAVA_VM_VERSION;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.kohsuke.args4j.*;
+import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,12 +117,12 @@ public class TimeOnAlphabetSize
          */
         final Runtime rt = Runtime.getRuntime();
 
-        logger.info("Algorithm: " + algorithm + ", alphabet: " + startAlphabet
-            + "-" + (startAlphabet + rounds * increment)
-            + ", input size: " + inputSize
+        logger.info("Algorithm: " + algorithm + ", alphabet: " + startAlphabet + "-"
+            + (startAlphabet + rounds * increment) + ", input size: " + inputSize
             + ", extraCells: " + extraCells + ", seed: " + randomSeed);
 
-        logger.info("Time: " + new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
+        logger.info("Time: "
+            + new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
         logger.info("JVM name: " + JAVA_VM_NAME);
         logger.info("JVM version: " + JAVA_VM_VERSION);
         logger.info("JVM info: " + JAVA_VM_INFO);
@@ -124,8 +135,8 @@ public class TimeOnAlphabetSize
         logger.info("Allocating random input: " + inputSize + " bytes.");
         final int [] input = new int [inputSize + extraCells];
 
-        out.println(String.format(Locale.US, "# %4s " + "%8s " + "%7s " + "%7s " + "%5s  "
-            + "%s", "rnd", "alph.size", "time", "mem(MB)", "av.lcp", "status"));
+        out.println(String.format(Locale.US, "# %4s " + "%8s " + "%7s " + "%7s "
+            + "%5s  " + "%s", "rnd", "alph.size", "time", "mem(MB)", "av.lcp", "status"));
 
         /*
          * Run the test. Warmup rounds have negative round numbers.
@@ -134,7 +145,8 @@ public class TimeOnAlphabetSize
         int size = startAlphabet;
         for (int round = -warmup; round < rounds; round++)
         {
-            for (int sample = 0; sample < samples; sample++) {
+            for (int sample = 0; sample < samples; sample++)
+            {
                 MemoryLogger.reset();
 
                 final MinMax alphabet = new MinMax(1, size);
@@ -166,18 +178,18 @@ public class TimeOnAlphabetSize
                 {
                     endTime = System.currentTimeMillis();
                 }
-    
+
                 // round, input size, suffix building time, mem used (MB), avg.lcp, status
                 final String result = String.format(Locale.US, "%6d " + "%8d " + "%7.3f "
                     + "%7.3f " + "%5.2f  " + "%s", round, size,
                     (endTime - startTime) / 1000.0d, MemoryLogger.getMemoryUsed()
                         / (double) (1024 * 1024), averageLCP, status);
                 out.println(result);
-    
-                if (round >= 0)
-                {
-                    size += increment;
-                }
+
+            }
+            if (round >= 0)
+            {
+                size += increment;
             }
         }
 
