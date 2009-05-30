@@ -9,7 +9,7 @@
 #
 # Which algorithms to test?
 #
-ALGORITHMS="SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
+ALGORITHMS="SKEW DIVSUFSORT BPR QSUFSORT"
 #ALGORITHMS="DIVSUFSORT QSUFSORT"
 
 #
@@ -57,3 +57,16 @@ for file in `find ${CORPUS_DIR} -type f -print`; do
 	#./render-corpus-file.sh $OUTPUT_DIR/averages $OUTPUT_DIR/averages-plot
 
 done 
+
+
+#
+# Calculate summary for each corpus
+#
+
+RESULTS_DIR=`dirname $0`/results/corpus
+
+for dir in `find ${RESULTS_DIR}  -mindepth 1  -maxdepth 1 -type d  -print`; do
+	./sum-avgs.rb $dir > tee $dir.sum.log
+	#./render-corpus-summary.sh $dir.sum.log $dir.sum.plot
+done;
+

@@ -32,5 +32,5 @@ def stddev(a)
    end
 end
 
-puts "%.4f %.4f %s" % [avg(columns[2]), stddev(columns[2]), columns[6][0].gsub("_", "-")]
+puts "%.4f %.4f %s" % [avg(columns[2]), stddev(columns[2]), columns[6][0].gsub("_", "-")] unless columns.length == 0
 

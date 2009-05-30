@@ -14,3 +14,8 @@ for file in `find ${CORPUS_DIR} -type f -print`; do
 	./render-corpus-file.sh $OUTPUT_DIR/averages $OUTPUT_DIR/averages-plot
 	
 done	
+
+RESULTS_DIR=`dirname $0`/results/corpus
+for dir in `find ${RESULTS_DIR}  -mindepth 1  -maxdepth 1 -type d  -print`; do
+	./render-corpus-summary.sh $dir.sum.log $dir.sum.plot
+done;
