@@ -36,7 +36,7 @@ end
 
 
 
-map.keys.sort.each do |key|
+map.keys.sort {|a,b| a.to_i <=> b.to_i}.each do |key|
   puts "%s %d %.4f %.4f %.4f %.4f" % [key, map[key][1][0],   avg(map[key][2]), stddev(map[key][2]), avg(map[key][3]), stddev(map[key][3])]
 
 end

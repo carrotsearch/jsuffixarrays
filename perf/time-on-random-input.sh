@@ -10,8 +10,8 @@
 #
 # Which algorithms to test?
 #
-#ALGORITHMS="NS SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
-ALGORITHMS="DIVSUFSORT QSUFSORT"
+ALGORITHMS="NS SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
+#ALGORITHMS="DIVSUFSORT QSUFSORT"
 
 #
 # Run evaluations.
@@ -29,7 +29,7 @@ for algorithm in $ALGORITHMS; do
         $algorithm \
         --alphabet-size 32 \
         --start-size 1000000 --increment 1000000 \
-        --rounds 2 --warmup-rounds 0 --samples 3 \
+        --rounds 20 --warmup-rounds 10 --samples 10 \
     | tee $OUTPUT_DIR/$algorithm.log
 done
 

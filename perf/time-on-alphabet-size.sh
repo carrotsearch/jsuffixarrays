@@ -9,8 +9,9 @@
 #
 # Which algorithms to test?
 #
-#ALGORITHMS="NS SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
-ALGORITHMS="DIVSUFSORT QSUFSORT"
+ALGORITHMS="NS SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
+#ALGORITHMS="DIVSUFSORT QSUFSORT"
+
 #
 # Run evaluations.
 #
@@ -25,9 +26,9 @@ for algorithm in $ALGORITHMS; do
 
     run_java org.jsuffixarrays.TimeOnAlphabetSize \
         $algorithm \
-        --input-size 500000 \
+        --input-size 5000000 \
         --start-alphabet 5 --increment 10 \
-        --rounds 25 --warmup-rounds 10 --samples 3 \
+        --rounds 25 --warmup-rounds 10 --samples 10 \
     | tee $OUTPUT_DIR/$algorithm.log
 done
 
@@ -35,7 +36,7 @@ done
 # Compute statistics
 #
 for algorithm in $ALGORITHMS; do
-	./avg-random.rb < $OUTPUT_DIR/$algorithm.log  >>  $OUTPUT_DIR/$algorithm.avg.log
+	./avg-random.rb < $OUTPUT_DIR/$algorithm.log  >  $OUTPUT_DIR/$algorithm.avg.log
 done
 
 #

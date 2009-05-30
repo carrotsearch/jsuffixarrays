@@ -9,8 +9,8 @@
 #
 # Which algorithms to test?
 #
-#ALGORITHMS="SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
-ALGORITHMS="DIVSUFSORT QSUFSORT"
+ALGORITHMS="SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
+#ALGORITHMS="DIVSUFSORT QSUFSORT"
 
 #
 # Check parameters.
@@ -34,7 +34,7 @@ for file in `find ${CORPUS_DIR} -type f -print`; do
 
 	    run_java org.jsuffixarrays.TimeOnFile \
 	        $algorithm \
-	        --rounds 3 --warmup-rounds 1 \
+	        --rounds 10 --warmup-rounds 5 \
 	        $file \
 	    2>$OUTPUT_DIR/$algorithm.err | tee $OUTPUT_DIR/$algorithm.log
 
