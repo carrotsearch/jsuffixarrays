@@ -69,13 +69,13 @@ public class TimeOnFile
         {
             // Do nothing.
         }
-        
+
         public void undo(int [] input, int start, int length)
         {
             // Do nothing.
         }
     }
-    
+
     /*
      * Run the performance test.
      */
@@ -97,7 +97,8 @@ public class TimeOnFile
         logger.info("Algorithm: " + algorithm + ", file: " + inputFile.getName()
             + ", extraCells: " + extraCells);
 
-        logger.info("Time: " + new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
+        logger.info("Time: "
+            + new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
         logger.info("JVM name: " + JAVA_VM_NAME);
         logger.info("JVM version: " + JAVA_VM_VERSION);
         logger.info("JVM info: " + JAVA_VM_INFO);
@@ -120,7 +121,7 @@ public class TimeOnFile
             {
                 for (int i = 0; i < len; i++, pos++)
                 {
-                    input[pos] = ((int) buffer[i]) & 0xff;
+                    input[pos] = (buffer[i]) & 0xff;
                 }
             }
         }
@@ -130,8 +131,8 @@ public class TimeOnFile
         }
 
         /*
-         * We want the input to be identical (and acceptable) for all algorithms,
-         * without any special decorators.
+         * We want the input to be identical (and acceptable) for all algorithms, without
+         * any special decorators.
          */
         final int start = 0;
         final ISymbolMapper mapper;
@@ -145,15 +146,14 @@ public class TimeOnFile
         }
         mapper.map(input, start, size);
 
-        out.println(String.format(Locale.US, 
-            "%4s %7s %7s %7s %5s %s %s", 
-            "rnd", "size", "time", "mem(MB)", "av.lcp", "status", "algorithm"));
+        out.println(String.format(Locale.US, "%4s %7s %7s %7s %5s %s %s", "rnd", "size",
+            "time", "mem(MB)", "av.lcp", "status", "algorithm"));
 
         /*
          * Run the test. Warmup rounds have negative round numbers.
          */
         logger.info("Running the test.");
-        final ISuffixArrayBuilder builder = algorithm.getInstance();
+        final ISuffixArrayBuilder builder = algorithm.getMemorySparingInstance();
         for (int round = -warmup; round < rounds; round++)
         {
             MemoryLogger.reset();
@@ -166,13 +166,13 @@ public class TimeOnFile
             try
             {
                 final int [] sa = builder.buildSuffixArray(input, 0, size);
-                final int [] lcp = SuffixArrays.computeLCP(input, 0, size, sa);
-                long prefixesLen = 0;
-                for (int i = 0; i < size; i++)
-                {
-                    prefixesLen += lcp[i];
-                }
-                averageLCP = prefixesLen / (double) size;
+                // final int [] lcp = SuffixArrays.computeLCP(input, 0, size, sa);
+                // long prefixesLen = 0;
+                // for (int i = 0; i < size; i++)
+                // {
+                // prefixesLen += lcp[i];
+                // }
+                // averageLCP = prefixesLen / (double) size;
             }
             catch (OutOfMemoryError t)
             {
@@ -190,8 +190,8 @@ public class TimeOnFile
             }
 
             // round, input size, suffix building time, mem used (MB), avg.lcp, status
-            final String result = String.format(Locale.US, 
-                "%4d " + "%7d " + "%7.3f " + "%7.3f " + "%5.2f  " + "%s %s", round, size,
+            final String result = String.format(Locale.US, "%4d " + "%7d " + "%7.3f "
+                + "%7.3f " + "%5.2f  " + "%s %s", round, size,
                 (endTime - startTime) / 1000.0d, MemoryLogger.getMemoryUsed()
                     / (double) (1024 * 1024), averageLCP, status, algorithm.toString());
             out.println(result);

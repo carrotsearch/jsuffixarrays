@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Measure the execution time on a given corpus file.
+# Measure the execution time on all files placed in corpus directory
 #
 
 . ./setup.sh
@@ -10,7 +10,7 @@
 # Which algorithms to test?
 #
 ALGORITHMS="SKEW DIVSUFSORT BPR QSUFSORT"
-#ALGORITHMS="DIVSUFSORT QSUFSORT"
+
 
 #
 # Check parameters.
@@ -18,6 +18,7 @@ ALGORITHMS="SKEW DIVSUFSORT BPR QSUFSORT"
 
 CORPUS_DIR=`dirname $0`/corpus
 
+#TODO dont run deep shallow on gauntlet
 for file in `find ${CORPUS_DIR} -type f -print`; do
 	
 	#
@@ -66,7 +67,7 @@ done
 RESULTS_DIR=`dirname $0`/results/corpus
 
 for dir in `find ${RESULTS_DIR}  -mindepth 1  -maxdepth 1 -type d  -print`; do
-	./sum-avgs.rb $dir > tee $dir.sum.log
+	./sum-avgs.rb $dir > $dir.sum.log
 	#./render-corpus-summary.sh $dir.sum.log $dir.sum.plot
 done;
 

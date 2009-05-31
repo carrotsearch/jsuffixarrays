@@ -43,23 +43,22 @@ public enum Algorithm
 
     /**
      * @return Same as {@link #getInstance()}, but returns the algorithm instance
-     * decorated to work with any range or distribution of input symbols (respecting
-     * each algorithm's constraints).   
+     *         decorated to work with any range or distribution of input symbols
+     *         (respecting each algorithm's constraints).
      */
     public ISuffixArrayBuilder getDecoratedInstance()
     {
         switch (this)
         {
             case SKEW:
-                return new DensePositiveDecorator(
-                    new ExtraTrailingCellsDecorator(getInstance(), 
-                        SuffixArrays.MAX_EXTRA_TRAILING_SPACE));
+                return new DensePositiveDecorator(new ExtraTrailingCellsDecorator(
+                    getInstance(), SuffixArrays.MAX_EXTRA_TRAILING_SPACE));
 
             default:
                 return getInstance();
         }
     }
-    
+
     /**
      * @return Create and return an algorithm instance.
      */
@@ -91,6 +90,24 @@ public enum Algorithm
         }
 
         throw new RuntimeException("No algorithm for constant: " + this);
+    }
+
+    /*
+     * for performance tests
+     */
+    public ISuffixArrayBuilder getMemorySparingInstance()
+    {
+        switch (this)
+        {
+            case QSUFSORT:
+                return new QSufSort(false);
+            case BPR:
+                return new BPR(false);
+            case DEEP_SHALLOW:
+                return new DeepShallow(false);
+            default:
+                return getInstance();
+        }
     }
 
     /**
