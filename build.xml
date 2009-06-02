@@ -93,9 +93,7 @@
     </target>
 
     <!-- -->
-    <target name="test" depends="compile" description="Run JUnit tests.">
-    	<echo>"Skipping tests"</echo>
-      	<!-- 
+    <target name="test" depends="compile" unless="skip.tests" description="Run JUnit tests.">
     	<mkdir dir="${junit.output.dir}" />
 
         <junit fork="yes" printsummary="withOutAndErr" 
@@ -129,7 +127,6 @@
           </or>
         </condition>
         <fail message="Tests failed. See ${junit.output.dir} for report." if="tests.failed" /> 
-   		-->
     </target>
 
     <!-- -->
