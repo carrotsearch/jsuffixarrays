@@ -4,7 +4,6 @@
 # Script for generating corpus summary table. Body of latex table, to be exact.
 #
 
-
 $algorithms = ["BPR", "DIVSUFSORT", "QSUFSORT", "SKEW"]
 $map = {}
 

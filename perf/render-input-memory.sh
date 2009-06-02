@@ -13,6 +13,7 @@ fi
 
 INPUT_DIR=$1
 OUTPUT_FILE=$2
+SIZE=$3
 
 #
 # Generate gnuplot script.
@@ -33,7 +34,7 @@ cat >.tmp.gnuplot <<EOF
     set xlabel "input size [millions elements]"
     set ylabel "memory [MB]"
 
-    set output "${OUTPUT_FILE}.eps"
+    set output "${OUTPUT_FILE}-${SIZE}.eps"
 
     set boxwidth -2 absolute
 
@@ -44,8 +45,8 @@ cat >.tmp.gnuplot <<EOF
 EOF
 
 export IFS=$'\n'
-for file in `find ${INPUT_DIR} -name "*.avg.log" -print | sort`; do
-name=`basename $file .avg.log | tr _ -` 
+for file in `find ${INPUT_DIR} -name "*${SIZE}.avg.log" -print | sort`; do
+name=`basename $file -${SIZE}.avg.log | tr _ -` 
 cat >>.tmp.gnuplot <<EOF
     "$file" \\
 	   using (\$2 / 1000000):(\$1 >= 0 ? \$5 : 1/0) t ""       with lines ls 1, \\
@@ -63,10 +64,10 @@ gnuplot .tmp.gnuplot
 # Convert to PDF, trimming on the way.
 #
 
-cat ${OUTPUT_FILE}.eps | \
+cat ${OUTPUT_FILE}-${SIZE}.eps | \
 ps2eps -q --clip --ignoreBB --gsbbox | \
 gs -q -dNOPAUSE -dBATCH -dEPSCrop -dNOCACHE -dPDFSETTINGS=/printer -sPAPERSIZE=a4 \
-    -dAutoRotatePages=/PageByPage -sDEVICE=pdfwrite -sOutputFile=${OUTPUT_FILE}.pdf - -c quit
+    -dAutoRotatePages=/PageByPage -sDEVICE=pdfwrite -sOutputFile=${OUTPUT_FILE}-${SIZE}.pdf - -c quit
 
 rm .tmp.gnuplot
 

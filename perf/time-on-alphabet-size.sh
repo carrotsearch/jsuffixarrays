@@ -10,7 +10,7 @@
 # Which algorithms to test?
 #
 ALGORITHMS="NS SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
-#ALGORITHMS="DIVSUFSORT QSUFSORT"
+
 
 #
 # Run evaluations.
@@ -28,8 +28,13 @@ for algorithm in $ALGORITHMS; do
         $algorithm \
         --input-size 5000000 \
         --start-alphabet 5 --increment 10 \
-        --rounds 25 --warmup-rounds 10 --samples 10 \
-    | tee $OUTPUT_DIR/$algorithm.log
+        --rounds 26 --warmup-rounds 10 --samples 10 \
+    2>$OUTPUT_DIR/$algorithm.err | tee $OUTPUT_DIR/$algorithm.log
+
+	 # Remove empty logs.
+	 if [ ! -s $OUTPUT_DIR/$algorithm.err ]; then
+         rm $OUTPUT_DIR/$algorithm.err
+     fi
 done
 
 #
@@ -42,7 +47,6 @@ done
 #
 # Render plots.
 #
-
-#./render-alphabet-time.sh $OUTPUT_DIR results/random-alphabet-time
-#./render-alphabet-lcp.sh  $OUTPUT_DIR results/random-alphabet-lcp
+./render-alphabet-time.sh $OUTPUT_DIR results/random-alphabet-time
+./render-alphabet-lcp.sh  $OUTPUT_DIR results/random-alphabet-lcp
 

@@ -31,12 +31,34 @@ check_java() {
 # SUN JVM, server mode.
 sun_java() {
     check_java $JAVA_SUN, "JAVA_SUN"
-    ${JAVA_SUN}/bin/java -Xmx1g -server $@ 
+    ${JAVA_SUN}/bin/java -Xmx2g -server -cp $PERF_CLASSPATH $@ 
 }
+
+# IBM JVM, server mode.
+ibm_java() {
+    check_java $JAVA_IBM, "JAVA_IBM"
+    ${JAVA_IBM}/bin/java -Xmx2g -server -cp $PERF_CLASSPATH $@ 
+}
+
+# JROCKIT JVM, server mode.
+jrockit_java() {
+    check_java $JAVA_JROCKIT, "JAVA_JROCKIT"
+    ${JAVA_JROCKIT}/bin/java -Xmx2g -server -cp $PERF_CLASSPATH $@ 
+}
+
+
+# HARMONY JVM, server mode.
+harmony_java() {
+    check_java $JAVA_HARMONY, "JAVA_HARMONY"
+    ${JAVA_HARMONY}/bin/java -Xmx2g -server -cp $PERF_CLASSPATH $@ 
+}
+
+
+
 
 # Default Java for tests that don't make this distinction.
 run_java() {
-    sun_java -cp $PERF_CLASSPATH $@ 
+    sun_java  $@ 
 }
 
 #

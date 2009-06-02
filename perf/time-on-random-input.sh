@@ -8,10 +8,16 @@
 . ./setup.sh
 
 #
+# Which alphabet sizes to test?
+#
+SIZES="4 100 255"
+
+
+#
 # Which algorithms to test?
 #
 ALGORITHMS="NS SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
-#ALGORITHMS="DIVSUFSORT QSUFSORT"
+
 
 #
 # Run evaluations.
@@ -19,31 +25,37 @@ ALGORITHMS="NS SKEW DIVSUFSORT BPR DEEP_SHALLOW QSUFSORT"
 OUTPUT_DIR=results/random-input
 mkdir -p $OUTPUT_DIR
 
-for algorithm in $ALGORITHMS; do
-    if [ -f $OUTPUT_DIR/$algorithm.log ]; then
-        echo "Skipping: $algorithm (log exists)."
-        continue
-    fi
+for size in $SIZES; do
+	for algorithm in $ALGORITHMS; do
+	    if [ -f $OUTPUT_DIR/$algorithm-$size.log ]; then
+	        echo "Skipping: $algorithm on size $size (log exists)."
+	        continue
+	    fi
 
-    run_java org.jsuffixarrays.TimeOnRandomInput \
-        $algorithm \
-        --alphabet-size 32 \
-        --start-size 1000000 --increment 1000000 \
-        --rounds 20 --warmup-rounds 10 --samples 10 \
-    | tee $OUTPUT_DIR/$algorithm.log
+	    run_java org.jsuffixarrays.TimeOnRandomInput \
+	        $algorithm \
+	        --alphabet-size $size \
+	        --start-size 1000000 --increment 1000000 \
+	        --rounds 25 --warmup-rounds 10 --samples 10 \
+	    2>$OUTPUT_DIR/$algorithm-$size.err | tee $OUTPUT_DIR/$algorithm-$size.log
+	
+	    # Remove empty logs.
+	    if [ ! -s $OUTPUT_DIR/$algorithm-$size.err ]; then
+            rm $OUTPUT_DIR/$algorithm-$size.err
+        fi
+	done
+
+	#
+	#compute statistics
+	#
+	for algorithm in $ALGORITHMS; do
+		./avg-random.rb < $OUTPUT_DIR/$algorithm-$size.log > $OUTPUT_DIR/$algorithm-$size.avg.log
+	done
+
+
+	#
+	# Render plots.
+	#
+	./render-input-time.sh  $OUTPUT_DIR results/random-input-time $size
+	./render-input-memory.sh $OUTPUT_DIR results/random-input-memory $size
 done
-
-#
-#compute statistics
-#
-for algorithm in $ALGORITHMS; do
-	./avg-random.rb < $OUTPUT_DIR/$algorithm.log > $OUTPUT_DIR/$algorithm.avg.log
-done
-
-
-#
-# Render plots.
-#
-
-#./render-input-time.sh  $OUTPUT_DIR results/random-input-time
-#./render-input-memory.sh $OUTPUT_DIR results/random-input-memory
