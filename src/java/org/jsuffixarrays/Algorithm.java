@@ -92,10 +92,15 @@ public enum Algorithm
         throw new RuntimeException("No algorithm for constant: " + this);
     }
 
-    /*
-     * for performance tests
+    /**
+     * If it is possbile, create memory conserving instance of an algorithm, <b>this
+     * instance will overwrite input.</b>
+     * <p>
+     * If not, create default instance
+     * 
+     * @return Create and return low memory consuming instance.
      */
-    public ISuffixArrayBuilder getMemorySparingInstance()
+    public ISuffixArrayBuilder getMemoryConservingInstance()
     {
         switch (this)
         {

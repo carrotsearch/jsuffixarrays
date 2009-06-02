@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 public class TimeOnAlphabetSize
 {
     private final Logger logger = LoggerFactory.getLogger("results");
+    private final Logger errors = LoggerFactory.getLogger("errors");
 
     @Option(aliases =
     {
@@ -118,7 +119,7 @@ public class TimeOnAlphabetSize
         final Runtime rt = Runtime.getRuntime();
 
         logger.info("Algorithm: " + algorithm + ", alphabet: " + startAlphabet + "-"
-            + (startAlphabet + rounds * increment) + ", input size: " + inputSize
+            + (startAlphabet + (rounds - 1) * increment) + ", input size: " + inputSize
             + ", extraCells: " + extraCells + ", seed: " + randomSeed);
 
         logger.info("Time: "
@@ -169,22 +170,31 @@ public class TimeOnAlphabetSize
                 catch (OutOfMemoryError t)
                 {
                     status = "oom";
+                    errors.error("OutOfMemory: " + t.getMessage(), t);
                 }
                 catch (Throwable t)
                 {
                     status = "err";
+                    errors.error("Processing error: " + t.getMessage(), t);
                 }
                 finally
                 {
                     endTime = System.currentTimeMillis();
                 }
 
-                // round, input size, suffix building time, mem used (MB), avg.lcp, status
+                // round, input size, suffix building time, mem used (MB),
+                // avg.lcp, status
                 final String result = String.format(Locale.US, "%6d " + "%8d " + "%7.3f "
                     + "%7.3f " + "%5.2f  " + "%s", round, size,
                     (endTime - startTime) / 1000.0d, MemoryLogger.getMemoryUsed()
                         / (double) (1024 * 1024), averageLCP, status);
                 out.println(result);
+
+                // don't take more samples in warmup rounds
+                if (round < 0)
+                {
+                    break;
+                }
 
             }
             if (round >= 0)

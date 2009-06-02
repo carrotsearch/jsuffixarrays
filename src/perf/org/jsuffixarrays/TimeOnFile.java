@@ -153,7 +153,7 @@ public class TimeOnFile
          * Run the test. Warmup rounds have negative round numbers.
          */
         logger.info("Running the test.");
-        final ISuffixArrayBuilder builder = algorithm.getMemorySparingInstance();
+        final ISuffixArrayBuilder builder = algorithm.getMemoryConservingInstance();
         for (int round = -warmup; round < rounds; round++)
         {
             MemoryLogger.reset();
@@ -165,8 +165,14 @@ public class TimeOnFile
             double averageLCP = 0;
             try
             {
-                final int [] sa = builder.buildSuffixArray(input, 0, size);
-                // final int [] lcp = SuffixArrays.computeLCP(input, 0, size, sa);
+                builder.buildSuffixArray(input, 0, size);
+
+                /*
+                 * I've removed lcp computation to lower the memory usage
+                 */
+                // final int [] sa = builder.buildSuffixArray(input, 0, size);
+                // final int [] lcp = SuffixArrays.computeLCP(input, 0, size,
+                // sa);
                 // long prefixesLen = 0;
                 // for (int i = 0; i < size; i++)
                 // {
@@ -189,7 +195,8 @@ public class TimeOnFile
                 endTime = System.currentTimeMillis();
             }
 
-            // round, input size, suffix building time, mem used (MB), avg.lcp, status
+            // round, input size, suffix building time, mem used (MB), avg.lcp,
+            // status
             final String result = String.format(Locale.US, "%4d " + "%7d " + "%7.3f "
                 + "%7.3f " + "%5.2f  " + "%s %s", round, size,
                 (endTime - startTime) / 1000.0d, MemoryLogger.getMemoryUsed()
