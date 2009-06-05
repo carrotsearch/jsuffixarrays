@@ -8,15 +8,15 @@ $algorithms = ["BPR", "DIVSUFSORT", "QSUFSORT", "SKEW"]
 $map = {}
 
 def header()
-  print"\\begin{tabular}{|l|"
+  print"\\begin{tabular}{l "
   $algorithms.each { |alg|
-    print "r|"
+    print "r "
   }
-  puts "} \\hline"
+  puts "} \\toprule"
   $algorithms.each { |alg|
-   print " & \\emph{" + alg.downcase + "}" 
+   print " & \\emph{" + alg.gsub("_", "\\_").downcase + "}" 
   }
-  puts "\\\\ \\hline"
+  puts "\\\\ \\midrule"
   
 end
 
@@ -51,7 +51,7 @@ Dir.foreach(ARGV[0]) { |f|
   flag = 0
   print "\\texttt{" + f.gsub("_", "\\_") + "}"
   $algorithms.each { |alg|
-    $map[alg] = "oom"
+    $map[alg] = "---"
   }
   line(ARGV[0] + "/" + f + "/averages",2)
 }
@@ -59,11 +59,11 @@ Dir.foreach(ARGV[0]) { |f|
 #
 # summary 
 # 
-puts " \\hline"
+puts " \\midrule"
 
 print "Total"
 line(ARGV[0] + ".sum.log", 1)
-puts " \\hline"
+puts " \\bottomrule"
 puts "\\end{tabular}"
 
 

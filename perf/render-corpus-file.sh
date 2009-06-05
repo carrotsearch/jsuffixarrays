@@ -1,7 +1,6 @@
 #!/bin/bash
 
 . ./setup.sh
-
 if [ $# -lt 1 ]; then
     echo "$0 [averages file] [chart file]"
     exit 1

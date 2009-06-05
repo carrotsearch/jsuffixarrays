@@ -8,7 +8,8 @@ columns = []
 
 $stdin.each_line do |line|
     row_values = line.split
-    next if line.empty? or not row_values[0] =~ /[0-9]+/ or row_values[0].to_i < 0
+    next if line.empty? or not row_values[0] =~ /^[0-9]+/ or row_values[0].to_i < 0 
+    exit unless row_values[5] =~ /ok/
 
     row_values.each_index do |i|
         columns.push([]) if columns.length <= i

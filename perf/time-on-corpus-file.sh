@@ -25,7 +25,7 @@ CORPUS_DIR=`dirname $0`/corpus
 
 for jvm in $JVMS; do
     echo "Running corpus tests on $jvm VM"
-	for file in `find ${CORPUS_DIR} -type f -print`; do
+	for file in `find ${CORPUS_DIR} -not \( -name ".DS_Store" \) -type f -print`; do
 
 		#
 		# Run evaluations.
@@ -59,8 +59,8 @@ for jvm in $JVMS; do
 
 		#
 		# Render plots.
-		#
-		./render-corpus-file.sh $OUTPUT_DIR/averages $OUTPUT_DIR/averages-plot
+		# I don't think I would use this graphs
+		#./render-corpus-file.sh $OUTPUT_DIR/averages $OUTPUT_DIR/averages-plot
 	done
 	
 	#
@@ -68,7 +68,7 @@ for jvm in $JVMS; do
 	#
 	RESULTS_DIR=`dirname $0`/results/corpus/$jvm/corpus
 
-	for dir in `find ${RESULTS_DIR}  -mindepth 1  -maxdepth 1 -type d  -print`; do
+	for dir in `find ${RESULTS_DIR} -not \( -name ".DS_Store" \) -mindepth 1  -maxdepth 1 -type d  -print`; do
 		./sum-avgs.rb $dir > $dir.sum.log
 		./render-corpus-summary.sh $dir.sum.log $dir.sum.plot
 	done;

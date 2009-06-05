@@ -30,7 +30,7 @@ cat >.tmp.gnuplot <<EOF
     set ytics border nomirror
     set tics scale 1.0
 
-    set title "memory on random input"
+    set title "memory on random input, alphabet size = ${SIZE}"
     set xlabel "input size [millions elements]"
     set ylabel "memory [MB]"
 
