@@ -56,6 +56,7 @@ for size in $SIZES; do
 	#
 	# Render plots.
 	#
+	./render-input-lcp.sh  $OUTPUT_DIR results/random-input-lcp $size
 	./render-input-time.sh  $OUTPUT_DIR results/random-input-time $size
 	./render-input-memory.sh $OUTPUT_DIR results/random-input-memory $size
 done

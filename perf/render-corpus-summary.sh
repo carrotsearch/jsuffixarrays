@@ -24,7 +24,7 @@ cat >.tmp.gnuplot <<EOF
     set xtics border nomirror
     set ytics border nomirror
     set tics scale 1.0
-
+    set yrange [0:*]
     unset title
     unset xlabel
     set ylabel "time [s]"
