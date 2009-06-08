@@ -8,8 +8,8 @@ if [ $# -lt 1 ]; then
 fi
 
 INPUT_DIR=$1
-OUTPUT_FILE=$2-$3
-SIZE=$3
+OUTPUT_FILE=$2
+SIZES="4 100 255" 
 #
 # Generate gnuplot script.
 #
@@ -25,7 +25,7 @@ cat >.tmp.gnuplot <<EOF
     set ytics border nomirror
     set tics scale 1.0
 
-    set title "Average longest common prefix on random input, aphabet size = ${SIZE}"
+    set title "Average longest common prefix on random input"
     set xlabel "input size [millions elements]"
     set ylabel "average LCP"
 
@@ -39,14 +39,17 @@ cat >.tmp.gnuplot <<EOF
     plot \\
 EOF
 
-export IFS=$'\n'
-for file in `find ${INPUT_DIR} -name "*${SIZE}.avg.log" -print | sort`; do
+
+
+for size in $SIZES; do
+file=$INPUT_DIR/BPR-${size}.avg.log
+
 cat >>.tmp.gnuplot <<EOF
     "$file" \\
 	   using (\$2 / 1000000):(\$1 >= 0 ? \$7 : 1/0) t ""       with lines ls 1, \\
-	"" using (\$2 / 1000000):(\$1 >= 0 ? \$7 : 1/0) t ""       with points lc rgb "#000000",     \\
+	"" using (\$2 / 1000000):(\$1 >= 0 ? \$7 : 1/0) t "${size}"       with points lc rgb "#000000",     \\
 EOF
-break
+
 done
 echo -e '"" using 1:(1/0) t ""\n\n' >> .tmp.gnuplot
 
