@@ -192,7 +192,7 @@ public abstract class SuffixArrayBuilderTestBase
     }
 
     /*
-     * Make sure suffixes in a suffix array is sorted.
+     * Make sure suffixes in a suffix array are sorted.
      */
     private void assertSorted(int [] SA, int [] s, int n)
     {
