@@ -11,7 +11,6 @@ import com.google.common.collect.PrimitiveArrays;
  * algorith, depending on the distribution and properties of the input (alphabet size,
  * symbols distribution, etc.).
  */
-
 /**
  * <p>
  * Factory-like methods for constructing suffix arrays for various data types. Whenever
@@ -29,9 +28,9 @@ import com.google.common.collect.PrimitiveArrays;
 public final class SuffixArrays
 {
     /**
-     * Maximum required trailing space in the input array (certain algorithms need it). 
+     * Maximum required trailing space in the input array (certain algorithms need it).
      */
-    final static int MAX_EXTRA_TRAILING_SPACE = DeepShallow.OVERSHOOT; 
+    final static int MAX_EXTRA_TRAILING_SPACE = DeepShallow.OVERSHOOT;
 
     /*
      * 
@@ -79,7 +78,6 @@ public final class SuffixArrays
         final CharSequenceAdapter adapter = new CharSequenceAdapter(builder);
         final int [] sa = adapter.buildSuffixArray(s);
         final int [] lcp = computeLCP(adapter.input, 0, s.length(), sa);
-
         return new SuffixData(sa, lcp);
     }
 
@@ -89,8 +87,7 @@ public final class SuffixArrays
     public static SuffixData createWithLCP(int [] input, int start, int length)
     {
         final ISuffixArrayBuilder builder = new DensePositiveDecorator(
-            new ExtraTrailingCellsDecorator(new Skew(), 3));
-
+            new ExtraTrailingCellsDecorator(defaultAlgorithm(), 3));
         return createWithLCP(input, start, length, builder);
     }
 
@@ -123,7 +120,6 @@ public final class SuffixArrays
         final int [] rank = new int [length];
         for (int i = 0; i < length; i++)
             rank[sa[i]] = i;
-
         int h = 0;
         final int [] lcp = new int [length];
         for (int i = 0; i < length; i++)
@@ -147,6 +143,84 @@ public final class SuffixArrays
         }
 
         return lcp;
+
+    }
+
+    /**
+     * 
+     */
+    public static void visit(final int [] sa, final int [] lcp)
+    {
+
+        // for (int i = 0; i < sa.length; i++)
+        // {
+        // System.out.print(sa[i] + " ");
+        // }
+        // System.out.println();
+        //
+        for (int i = 0; i < lcp.length; i++)
+        {
+            System.out.print(lcp[i] + " ");
+        }
+        System.out.println();
+
+        foo(sa, lcp, 0, lcp.length, 0);
+
+    }
+
+    /**
+     * 
+     */
+    private static void foo(final int [] sa, final int [] lcp, int start, int length,
+        int x)
+    {
+        // System.out.println(start + " " + length + " " + x);
+        StringBuilder b = new StringBuilder("");
+        for (int i = 0; i < x; i++)
+        {
+            b.append("\t");
+        }
+        String pre = b.toString();
+
+        int i = start;
+        while (i < start + length)
+        {
+            if (lcp[i] - x <= 0) // TODO: remove this condition when algorithm is finished
+            {
+                // is zero is followed by another zero in lcp array, then suffix
+                // identified by former one is a leaf
+                if (i + 1 == start + length || lcp[i + 1] - x <= 0)
+                {
+                    System.out.println(pre + "leaf: sa[" + i + "]= " + sa[i]);
+                }
+                else
+                // group of positive values (and preceding zero) represents node in suffix
+                // tree
+                {
+                    int subtreeStart = i;
+                    int subtreeLength = 1;
+                    int subtreeCommonPrefixLength = Integer.MAX_VALUE;
+                    while (i + 1 < start + length && lcp[i + 1] - x > 0)
+                    {
+                        if (lcp[i + 1] - x > 0 && lcp[i + 1] < subtreeCommonPrefixLength)
+                        {
+                            subtreeCommonPrefixLength = lcp[i + 1];
+                        }
+                        i++;
+                        subtreeLength++;
+                    }
+                    System.out.println(pre + "node: " + subtreeStart + " -- " + (subtreeStart + subtreeLength - 1));
+
+                    // traverse subtree
+                    foo(sa, lcp, subtreeStart, subtreeLength, subtreeCommonPrefixLength);
+                }
+                i++;
+            }
+            else
+            {
+                throw new RuntimeException("FAIL");
+            }
+        }
     }
 
     /**
@@ -186,4 +260,11 @@ public final class SuffixArrays
         }
         return result;
     }
+
+    public static void main(String [] args)
+    {
+        SuffixData sd = createWithLCP("mississippia", new DivSufSort());
+        visit(sd.getSuffixArray(), sd.getLCP());
+    }
+
 }
