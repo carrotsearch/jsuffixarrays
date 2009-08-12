@@ -33,8 +33,8 @@ public final class SuffixArrays
     final static int MAX_EXTRA_TRAILING_SPACE = DeepShallow.OVERSHOOT;
 
     /*
-     * 
-     */
+	 * 
+	 */
     private SuffixArrays()
     {
         // no instances.
@@ -149,78 +149,53 @@ public final class SuffixArrays
     /**
      * 
      */
-    public static void visit(final int [] sa, final int [] lcp)
+    public static void visit(final int [] sa, final int [] lcp, IVisitor visitor)
     {
-
-        // for (int i = 0; i < sa.length; i++)
-        // {
-        // System.out.print(sa[i] + " ");
-        // }
-        // System.out.println();
-        //
-        for (int i = 0; i < lcp.length; i++)
-        {
-            System.out.print(lcp[i] + " ");
-        }
-        System.out.println();
-
-        foo(sa, lcp, 0, lcp.length, 0);
-
+        traverseSubtree(sa, lcp, 0, lcp.length, 0, visitor);
     }
 
     /**
      * 
      */
-    private static void foo(final int [] sa, final int [] lcp, int start, int length,
-        int x)
+    private static void traverseSubtree(final int [] sa, final int [] lcp, int start,
+        int length, int commonPrefixLength, IVisitor visitor)
     {
-        // System.out.println(start + " " + length + " " + x);
-        StringBuilder b = new StringBuilder("");
-        for (int i = 0; i < x; i++)
-        {
-            b.append("\t");
-        }
-        String pre = b.toString();
 
-        int i = start;
-        while (i < start + length)
+        if (visitor.pre(start, length))
         {
-            if (lcp[i] - x <= 0) // TODO: remove this condition when algorithm is finished
+            // dont try to descend deeper from leaves
+            if (length > 1)
             {
-                // is zero is followed by another zero in lcp array, then suffix
-                // identified by former one is a leaf
-                if (i + 1 == start + length || lcp[i + 1] - x <= 0)
-                {
-                    System.out.println(pre + "leaf: sa[" + i + "]= " + sa[i]);
-                }
-                else
-                // group of positive values (and preceding zero) represents node in suffix
-                // tree
+
+                int i = start;
+                while (i < start + length)
                 {
                     int subtreeStart = i;
                     int subtreeLength = 1;
                     int subtreeCommonPrefixLength = Integer.MAX_VALUE;
-                    while (i + 1 < start + length && lcp[i + 1] - x > 0)
+                    while (i + 1 < start + length && lcp[i + 1] - commonPrefixLength > 0)
                     {
-                        if (lcp[i + 1] - x > 0 && lcp[i + 1] < subtreeCommonPrefixLength)
+                        if (lcp[i + 1] - commonPrefixLength > 0
+                            && lcp[i + 1] < subtreeCommonPrefixLength)
                         {
                             subtreeCommonPrefixLength = lcp[i + 1];
                         }
                         i++;
                         subtreeLength++;
                     }
-                    System.out.println(pre + "node: " + subtreeStart + " -- " + (subtreeStart + subtreeLength - 1));
 
-                    // traverse subtree
-                    foo(sa, lcp, subtreeStart, subtreeLength, subtreeCommonPrefixLength);
+                    if (visitor.edge(start, length, subtreeStart, subtreeLength))
+                    {
+                        traverseSubtree(sa, lcp, subtreeStart, subtreeLength,
+                            subtreeCommonPrefixLength, visitor);
+                    }
+
+                    i++;
                 }
-                i++;
-            }
-            else
-            {
-                throw new RuntimeException("FAIL");
             }
         }
+        visitor.post(start, length);
+
     }
 
     /**
@@ -264,7 +239,39 @@ public final class SuffixArrays
     public static void main(String [] args)
     {
         SuffixData sd = createWithLCP("mississippia", new DivSufSort());
-        visit(sd.getSuffixArray(), sd.getLCP());
+        visit(sd.getSuffixArray(), sd.getLCP(), new IVisitor()
+        {
+
+            @Override
+            public boolean edge(int fromNodeStart, int fromNodeLength, int toNodeStart,
+                int toNodeLength)
+            {
+                System.out.println("EDGE:  from " + fromNodeStart + " -- "
+                    + (fromNodeStart + fromNodeLength) + " to " + toNodeStart + " -- "
+                    + (toNodeStart + toNodeLength));
+                return true;
+
+            }
+
+            @Override
+            public void post(int nodeStart, int nodeLength)
+            {
+                System.out.println("POST: " + nodeStart + " -- "
+                    + (nodeStart + nodeLength));
+
+            }
+
+            @Override
+            public boolean pre(int nodeStart, int nodeLength)
+            {
+                System.out.println("PRE: " + nodeStart + " -- "
+                    + (nodeStart + nodeLength));
+
+                return true;
+            }
+
+        });
+
     }
 
 }
