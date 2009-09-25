@@ -300,7 +300,6 @@ public class QSufSort implements ISuffixArrayBuilder
             V[start + I[pa]] = pa;
             I[pa] = -1; /* sorted group. */
         }
-
     }
 
     /**
@@ -341,7 +340,6 @@ public class QSufSort implements ISuffixArrayBuilder
             }
             else I[i--] = -1; /* one element, sorted group. */
         }
-
     }
 
     /**

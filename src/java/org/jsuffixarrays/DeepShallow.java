@@ -1002,7 +1002,6 @@ public class DeepShallow implements ISuffixArrayBuilder {
 
 		// ------- search for a useful pseudo-anchor -------------
 		if (MAX_PSEUDO_ANCHOR_OFFSET > 0) {
-
 			max_offset = min(depth - 1, MAX_PSEUDO_ANCHOR_OFFSET);
 			text_pos = suffixArray[a];
 			for (offset = 1; offset < max_offset; offset++) {
@@ -1020,7 +1019,6 @@ public class DeepShallow implements ISuffixArrayBuilder {
 			}
 		}
 		deepSort(a, n, depth);
-
 	}
 
 	/**

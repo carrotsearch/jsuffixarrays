@@ -8,9 +8,10 @@ import com.google.common.collect.PrimitiveArrays;
 
 /*
  * TODO: ultimately, this class should be "intelligent" enough to pick the best
- * algorith, depending on the distribution and properties of the input (alphabet size,
+ * algorithm, depending on the distribution and properties of the input (alphabet size,
  * symbols distribution, etc.).
  */
+
 /**
  * <p>
  * Factory-like methods for constructing suffix arrays for various data types. Whenever
@@ -143,7 +144,6 @@ public final class SuffixArrays
         }
 
         return lcp;
-
     }
 
     /**
@@ -160,13 +160,11 @@ public final class SuffixArrays
     private static void traverseSubtree(final int [] sa, final int [] lcp, int start,
         int length, int commonPrefixLength, IVisitor visitor)
     {
-
         if (visitor.pre(start, length))
         {
             // dont try to descend deeper from leaves
             if (length > 1)
             {
-
                 int i = start;
                 while (i < start + length)
                 {
@@ -195,15 +193,15 @@ public final class SuffixArrays
             }
         }
         visitor.post(start, length);
-
     }
 
     /**
-     * @return Return a new instance of the default algorithm for use in other methods.
+     * @return Return a new instance of the default algorithm for use in other methods. At
+     * the moment {@link QSufSort} is used.
      */
     private static ISuffixArrayBuilder defaultAlgorithm()
     {
-        return new Skew();
+        return new QSufSort();
     }
 
     /**
@@ -235,43 +233,4 @@ public final class SuffixArrays
         }
         return result;
     }
-
-    public static void main(String [] args)
-    {
-        SuffixData sd = createWithLCP("mississippia", new DivSufSort());
-        visit(sd.getSuffixArray(), sd.getLCP(), new IVisitor()
-        {
-
-            @Override
-            public boolean edge(int fromNodeStart, int fromNodeLength, int toNodeStart,
-                int toNodeLength)
-            {
-                System.out.println("EDGE:  from " + fromNodeStart + " -- "
-                    + (fromNodeStart + fromNodeLength) + " to " + toNodeStart + " -- "
-                    + (toNodeStart + toNodeLength));
-                return true;
-
-            }
-
-            @Override
-            public void post(int nodeStart, int nodeLength)
-            {
-                System.out.println("POST: " + nodeStart + " -- "
-                    + (nodeStart + nodeLength));
-
-            }
-
-            @Override
-            public boolean pre(int nodeStart, int nodeLength)
-            {
-                System.out.println("PRE: " + nodeStart + " -- "
-                    + (nodeStart + nodeLength));
-
-                return true;
-            }
-
-        });
-
-    }
-
 }

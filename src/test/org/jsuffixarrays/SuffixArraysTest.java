@@ -43,4 +43,43 @@ public class SuffixArraysTest
         }
         return prefix;
     }
+    
+    /*
+     * 
+     */
+    @Test
+    public void testSuffixArrayWalk()
+    {
+        SuffixData sd = SuffixArrays.createWithLCP("mississippi$");
+        SuffixArrays.visit(sd.getSuffixArray(), sd.getLCP(), new IVisitor()
+        {
+            @Override
+            public boolean edge(int fromNodeStart, int fromNodeLength, int toNodeStart,
+                int toNodeLength)
+            {
+                System.out.println("EDGE:  from " + fromNodeStart + " -- "
+                    + (fromNodeStart + fromNodeLength) + " to " + toNodeStart + " -- "
+                    + (toNodeStart + toNodeLength));
+                return true;
+
+            }
+
+            @Override
+            public void post(int nodeStart, int nodeLength)
+            {
+                System.out.println("POST: " + nodeStart + " -- "
+                    + (nodeStart + nodeLength));
+
+            }
+
+            @Override
+            public boolean pre(int nodeStart, int nodeLength)
+            {
+                System.out.println("PRE: " + nodeStart + " -- "
+                    + (nodeStart + nodeLength));
+
+                return true;
+            }
+        });
+    }
 }
