@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.PrimitiveArrays;
 
 /*
  * TODO: ultimately, this class should be "intelligent" enough to pick the best
@@ -147,55 +146,6 @@ public final class SuffixArrays
     }
 
     /**
-     * 
-     */
-    public static void visit(final int [] sa, final int [] lcp, IVisitor visitor)
-    {
-        traverseSubtree(sa, lcp, 0, lcp.length, 0, visitor);
-    }
-
-    /**
-     * 
-     */
-    private static void traverseSubtree(final int [] sa, final int [] lcp, int start,
-        int length, int commonPrefixLength, IVisitor visitor)
-    {
-        if (visitor.pre(start, length))
-        {
-            // dont try to descend deeper from leaves
-            if (length > 1)
-            {
-                int i = start;
-                while (i < start + length)
-                {
-                    int subtreeStart = i;
-                    int subtreeLength = 1;
-                    int subtreeCommonPrefixLength = Integer.MAX_VALUE;
-                    while (i + 1 < start + length && lcp[i + 1] - commonPrefixLength > 0)
-                    {
-                        if (lcp[i + 1] - commonPrefixLength > 0
-                            && lcp[i + 1] < subtreeCommonPrefixLength)
-                        {
-                            subtreeCommonPrefixLength = lcp[i + 1];
-                        }
-                        i++;
-                        subtreeLength++;
-                    }
-
-                    if (visitor.edge(start, length, subtreeStart, subtreeLength))
-                    {
-                        traverseSubtree(sa, lcp, subtreeStart, subtreeLength,
-                            subtreeCommonPrefixLength, visitor);
-                    }
-
-                    i++;
-                }
-            }
-        }
-        visitor.post(start, length);
-    }
-
-    /**
      * @return Return a new instance of the default algorithm for use in other methods. At
      * the moment {@link QSufSort} is used.
      */
@@ -214,22 +164,6 @@ public final class SuffixArrays
         for (int i = 0; i < input.length(); i++)
         {
             result.add(full.subSequence(suffixes[i], full.length()));
-        }
-        return result;
-    }
-
-    /**
-     * Utility method converting all suffixes of a given sequence of integers to a list of
-     * lists of integers.
-     */
-    public static List<String> toString(int [] input, int start, int length,
-        int [] suffixes)
-    {
-        final List<Integer> full = PrimitiveArrays.asList(input);
-        final ArrayList<String> result = Lists.newArrayList();
-        for (int i = 0; i < length; i++)
-        {
-            result.add(full.subList(suffixes[i], start + length).toString());
         }
         return result;
     }
