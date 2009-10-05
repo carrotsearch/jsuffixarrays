@@ -15,7 +15,7 @@ public class TraversalsTest
      * Test post-order walking of the virtual suffix tree.
      */
     @Test
-    public void preorder()
+    public void postorderTest()
     {
         final String input = "mississippi$";
         final SuffixData sd = SuffixArrays.createWithLCP(input);
@@ -54,5 +54,23 @@ public class TraversalsTest
             });
 
         Assert.assertEquals(Arrays.asList(expected), actual);
+    }
+    
+    /**
+     * Border cases for post-order traversal.
+     */
+    @Test
+    public void preorderEmptyInput()
+    {
+        // Empty input? No root, no nothing.
+        final SuffixData sd = SuffixArrays.createWithLCP("");
+        Traversals.postorder(0, sd.getSuffixArray(), sd.getLCP(),
+            new Traversals.IPostOrderVisitor()
+            {
+                public void visitNode(int start, int length)
+                {
+                    Assert.fail();
+                }
+            });
     }
 }
