@@ -15,8 +15,12 @@ public final class Traversals
         /**
          * Visits a node in the (virtual) suffix tree, labeled with <code>length</code>
          * objects starting at <code>start</code> in the input sequence.
+         * 
+         * @param start The node label's starting offset in the input sequence.
+         * @param length The node label's length (number of symbols).
+         * @param leaf <code>true</code> if this node is a leaf.
          */
-        public void visitNode(int start, int length);
+        public void visitNode(int start, int length, boolean leaf);
     }
 
     /**
@@ -46,21 +50,22 @@ public final class Traversals
         stack.push(-1, -1);
 
         // Process every leaf.
-        int top_i, top_h;
+        int top_h;
         for (int i = 0; i <= sequenceLength; i++)
         {
             final int h = (sequenceLength == i ? -1 : lcp[i]);
 
             while (true)
             {
-                top_i = stack.get(stack.size() - 2);
                 top_h = stack.get(stack.size() - 1);
-
                 if (top_h <= h) break;
 
                 // Visit the node and remove it from the end of the stack.
-                visitor.visitNode(sa[top_i], top_h);
+                final int top_i = stack.get(stack.size() - 2);
+                final boolean leaf = (top_i < 0); 
                 stack.pop(2);
+
+                visitor.visitNode(sa[leaf ? -(top_i + 1): top_i], top_h, leaf);
             }
 
             if (top_h < h)
@@ -70,7 +75,8 @@ public final class Traversals
 
             if (i < sequenceLength)
             {
-                stack.push(i, sequenceLength - sa[i]);
+                // Mark leaf nodes in the stack.
+                stack.push(-(i + 1), sequenceLength - sa[i]);
             }
         }
     }

@@ -47,9 +47,11 @@ public class TraversalsTest
         Traversals.postorder(input.length(), sd.getSuffixArray(), sd.getLCP(),
             new Traversals.IPostOrderVisitor()
             {
-                public void visitNode(int start, int length)
+                public void visitNode(int start, int length, boolean leaf)
                 {
-                    actual.add(input.subSequence(start, start + length).toString());
+                    final String label = input.subSequence(start, start + length).toString(); 
+                    Assert.assertTrue(leaf == label.endsWith("$"));
+                    actual.add(label);
                 }
             });
 
@@ -67,7 +69,7 @@ public class TraversalsTest
         Traversals.postorder(0, sd.getSuffixArray(), sd.getLCP(),
             new Traversals.IPostOrderVisitor()
             {
-                public void visitNode(int start, int length)
+                public void visitNode(int start, int length, boolean leaf)
                 {
                     Assert.fail();
                 }
