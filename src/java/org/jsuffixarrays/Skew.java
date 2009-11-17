@@ -41,10 +41,11 @@ public final class Skew implements ISuffixArrayBuilder
      * constant offset of <code>vi</code> is added to indexes from src.
      */
     private final static void radixPass(int [] src, int [] dst, int [] v, int vi,
-        final int n, final int K, int start)
+        final int n, final int K, int start, int [] cnt)
     {
-        // counter array
-        final int [] cnt = new int [K + 1];
+        // check counter array's size.
+        assert cnt.length >= K + 1;
+        Arrays.fill(cnt, 0, K + 1, 0);
 
         // count occurrences
         for (int i = 0; i < n; i++)
@@ -67,7 +68,7 @@ public final class Skew implements ISuffixArrayBuilder
      * Find the suffix array SA of s[0..n-1] in {1..K}^n. require s[n] = s[n+1] = s[n+2] =
      * 0, n >= 2.
      */
-    static final void suffixArray(int [] s, int [] SA, int n, int K, int start)
+    static final int[] suffixArray(int [] s, int [] SA, int n, final int K, int start, int [] cnt)
     {
         final int n0 = (n + 2) / 3, n1 = (n + 1) / 3, n2 = n / 3, n02 = n0 + n2;
 
@@ -86,9 +87,10 @@ public final class Skew implements ISuffixArrayBuilder
             if ((i % 3) != 0) s12[j++] = i;
 
         // lsb radix sort the mod 1 and mod 2 triples
-        radixPass(s12, SA12, s, +2, n02, K, start);
-        radixPass(SA12, s12, s, +1, n02, K, start);
-        radixPass(s12, SA12, s, +0, n02, K, start);
+        cnt = ensureSize(cnt, K + 1);
+        radixPass(s12, SA12, s, +2, n02, K, start, cnt);
+        radixPass(SA12, s12, s, +1, n02, K, start, cnt);
+        radixPass(s12, SA12, s, +0, n02, K, start, cnt);
 
         // find lexicographic names of triples
         int name = 0, c0 = -1, c1 = -1, c2 = -1;
@@ -118,7 +120,7 @@ public final class Skew implements ISuffixArrayBuilder
         // recurse if names are not yet unique
         if (name < n02)
         {
-            suffixArray(s12, SA12, n02, name, start);
+            cnt = suffixArray(s12, SA12, n02, name, start, cnt);
             // store unique names in s12 using the suffix array
             for (int i = 0; i < n02; i++)
                 s12[SA12[i]] = i + 1;
@@ -133,7 +135,7 @@ public final class Skew implements ISuffixArrayBuilder
         // stably sort the mod 0 suffixes from SA12 by their first character
         for (int i = 0, j = 0; i < n02; i++)
             if (SA12[i] < n0) s0[j++] = 3 * SA12[i];
-        radixPass(s0, SA0, s, 0, n0, K, start);
+        radixPass(s0, SA0, s, 0, n0, K, start, cnt);
 
         // merge sorted SA0 suffixes and sorted SA12 suffixes
         for (int p = 0, t = n0 - n1, k = 0; k < n; k++)
@@ -171,6 +173,22 @@ public final class Skew implements ISuffixArrayBuilder
                 }
             }
         }
+
+        return cnt;
+    }
+
+    /**
+     * Ensure array is large enough or reallocate (no copying).
+     */
+    private static final int [] ensureSize(int [] tab, int length)
+    {
+        if (tab.length < length)
+        {
+            tab = null;
+            tab = new int [length];
+        }
+        
+        return tab;
     }
 
     /**
@@ -204,14 +222,18 @@ public final class Skew implements ISuffixArrayBuilder
         assertAlways(input.length >= start + length + 3, "no extra space after input end");
         assert Tools.allPositive(input, start, length);
 
-        final int [] tail = new int [3];
-        final int [] SA = new int [length + 3];
         final int alphabetSize = Tools.max(input, start, length);
+        final int [] SA = new int [length + 3];
+
+        // Preserve the tail of the input (destroyed when constructing the array).
+        final int [] tail = new int [3];
         System.arraycopy(input, start + length, tail, 0, 3);
         Arrays.fill(input, start + length, start + length + 3, 0);
-        suffixArray(input, SA, length, alphabetSize, start);
-        System.arraycopy(tail, 0, input, start + length, 3);
 
+        suffixArray(input, SA, length, alphabetSize, start, new int [alphabetSize + 2]);
+
+        // Reconstruct the input's tail.
+        System.arraycopy(tail, 0, input, start + length, 3);
         return SA;
     }
 }

@@ -144,7 +144,7 @@ public class SkewTest extends SuffixArrayBuilderTestBase
                 for (int j = 0; j < N; j++)
                 {
                     printV(s, n, "s");
-                    Skew.suffixArray(s, SA, n, b, 0);
+                    Skew.suffixArray(s, SA, n, b, 0, new int [b + 1]);
                     Assert.assertTrue(s[n] == 0);
                     Assert.assertTrue(s[n + 1] == 0);
                     Assert.assertTrue(SA[n] == 0);
