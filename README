@@ -17,13 +17,3 @@ This project was started because not many suffix arrays algorithms have been por
 from the C (pointers, pointers) world and out of shear curiosity to see which algorithm
 will perform best.
 
-Developers (Eclipse)
---------------------
-
-You'll need to install JDT weaving support from:
-http://download.eclipse.org/tools/ajdt/34/dev/update
-
-Requirements
-------------
-
-Java 1.6 is required. 
