@@ -182,6 +182,7 @@
           <suiteXmlFiles>
             <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
           </suiteXmlFiles>
+          <forkedProcessTimeoutInSeconds>60</forkedProcessTimeoutInSeconds>
         </configuration>
       </plugin>      
     </plugins>

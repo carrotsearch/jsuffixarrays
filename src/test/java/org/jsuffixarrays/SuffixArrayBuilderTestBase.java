@@ -35,7 +35,7 @@ public abstract class SuffixArrayBuilderTestBase
     /**
      * Check the suffixes of <code>banana</code>.
      */
-    @Test(timeOut = 10000)
+    @Test
     public void checkBanana()
     {
         assertSuffixes("banana", "a", "ana", "anana", "banana", "na", "nana");
@@ -44,7 +44,7 @@ public abstract class SuffixArrayBuilderTestBase
     /**
      * Check the suffixes of <code>mississippi</code>.
      */
-    @Test(timeOut = 10000)
+    @Test
     public void checkMississippi()
     {
         assertSuffixes("mississippi", "i", "ippi", "issippi", "ississippi",
@@ -58,7 +58,7 @@ public abstract class SuffixArrayBuilderTestBase
      * <p>
      * Checks the LCP array created for the given input as well.
      */
-    @Test(timeOut = 10000)
+    @Test
     public void sameResultWithArraySlice()
     {
         final ISuffixArrayBuilder builder = getInstance();
@@ -104,7 +104,7 @@ public abstract class SuffixArrayBuilderTestBase
      * (every suffix array is a permutation of indices, every suffix in the suffix array
      * is lexicographically greater or equal than all its predecessors).
      */
-    @Test(timeOut = 10000)
+    @Test
     public void invariantsOnRandomSmallAlphabet()
     {
         final ISuffixArrayBuilder builder = getInstance();
@@ -120,7 +120,7 @@ public abstract class SuffixArrayBuilderTestBase
     /**
      * @see #invariantsOnRandomSmallAlphabet()
      */
-    @Test(timeOut = 10000)
+    @Test
     public void invariantsOnRandomLargeAlphabet()
     {
         final ISuffixArrayBuilder builder = getInstance();

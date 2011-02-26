@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="jsuffixarrays" parallel="methods" thread-count="8">
+<suite name="jsuffixarrays" parallel="methods" thread-count="4">
   <listeners>
     <listener class-name="org.jsuffixarrays.TextTestReporter"></listener>
   </listeners>
