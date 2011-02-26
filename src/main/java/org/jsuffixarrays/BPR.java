@@ -927,7 +927,7 @@ public class BPR implements ISuffixArrayBuilder
      * 
      * @param q size of q-gram.
      * @return Buckets containing pointers into the suffix array.
-     * @see determine_Buckets_Sarray_Sptrmap
+     * @see #determine_Buckets_Sarray_Sptrmap
      */
     private int [] determineAll_Buckets_Sarray_Sptrmap(int q)
     {
@@ -974,7 +974,7 @@ public class BPR implements ISuffixArrayBuilder
      * 
      * @param q size of q-gram.
      * @return Buckets containing pointers into the suffix array.
-     * @see determine_Buckets_Sarray
+     * @see #determine_Buckets_Sarray_Sptrmap(int)
      */
     private int [] determineAll_Buckets_Sarray(int q)
     {
@@ -1067,12 +1067,9 @@ public class BPR implements ISuffixArrayBuilder
      * Constructs all buckets w.r.t. q-gram size q, the up to prefix length q sorted
      * suffix array, and the bucket-pointer table.
      * 
-     * @param ustring of characters that are inline mapped to 0..alphabetsize-1.
      * @param q size of q-gram.
-     * @param suffixArrayPtr ptr that will be filled with the suffix array.
-     * @param sufPtrMapPtr ptr that will be filled with the bucket-pointer table.
      * @return Buckets containing pointers into the suffix array.
-     * @see determine_Buckets_Sarray_Sptrmap
+     * @see #determine_Buckets_Sarray_Sptrmap
      */
     private int [] determinePower2Alpha_Buckets_Sarray_Sptrmap(int q)
     {
@@ -1149,7 +1146,7 @@ public class BPR implements ISuffixArrayBuilder
      * 
      * @param q size of q-gram.
      * @return Buckets containing pointers into the suffix array.
-     * @see determine_Buckets_Sarray
+     * @see #determine_Buckets_Sarray_Sptrmap(int)
      */
     private int [] determinePower2Alpha_Buckets_Sarray(int q)
     {

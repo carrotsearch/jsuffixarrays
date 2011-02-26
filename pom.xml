@@ -107,6 +107,13 @@
     	<type>jar</type>
     	<scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>com.carrotsearch</groupId>
+    	<artifactId>hppc</artifactId>
+    	<version>0.3.3</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
   </dependencies>
 
 

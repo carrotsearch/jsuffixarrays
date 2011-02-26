@@ -2,7 +2,7 @@ package org.jsuffixarrays;
 
 import java.util.ArrayList;
 
-import org.carrot2.util.collect.primitive.IntQueue;
+import com.carrotsearch.hppc.IntStack;
 
 /**
  * Suffix array traversal routines (emulating corresponding suffix tree traversals).
@@ -80,7 +80,7 @@ public final class Traversals
     {
         assert sequenceLength <= sa.length && sequenceLength <= lcp.length : "Input sequence length larger than suffix array or the LCP.";
 
-        final IntQueue stack = new IntQueue();
+        final IntStack stack = new IntStack();
 
         // Push the stack bottom marker (sentinel).
         stack.push(-1, -1);
@@ -99,7 +99,7 @@ public final class Traversals
                 // Visit the node and remove it from the end of the stack.
                 final int top_i = stack.get(stack.size() - 2);
                 final boolean leaf = (top_i < 0);
-                stack.pop(2);
+                stack.discard(2);
 
                 visitor.visitNode(sa[leaf ? -(top_i + 1) : top_i], top_h, leaf);
             }
@@ -140,7 +140,7 @@ public final class Traversals
     {
         assert sequenceLength <= sa.length && sequenceLength <= lcp.length : "Input sequence length larger than suffix array or the LCP.";
 
-        final IntQueue stack = new IntQueue();
+        final IntStack stack = new IntStack();
         final ArrayList<E> values = new ArrayList<E>();
 
         // Push the stack bottom marker (sentinel).
@@ -164,7 +164,7 @@ public final class Traversals
                 top_c = values.remove(values.size() - 1);
                 final int top_i = stack.get(stack.size() - 2);
                 final boolean leaf = (top_i < 0);
-                stack.pop(2);
+                stack.discard(2);
 
                 ci = visitor.aggregate(top_c, ci);
                 visitor.visitNode(sa[leaf ? -(top_i + 1) : top_i], top_h, leaf, ci);

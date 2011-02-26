@@ -2,9 +2,8 @@ package org.jsuffixarrays;
 
 import static org.jsuffixarrays.Tools.assertAlways;
 
-import org.carrot2.util.IndirectComparator;
-import org.carrot2.util.IndirectSort;
-
+import com.carrotsearch.hppc.sorting.IndirectComparator;
+import com.carrotsearch.hppc.sorting.IndirectSort;
 import com.google.common.primitives.Ints;
 
 /**

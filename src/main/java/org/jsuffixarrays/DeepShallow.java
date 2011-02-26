@@ -70,9 +70,9 @@ public class DeepShallow implements ISuffixArrayBuilder {
 	private final static int B2G_RATIO = 1000;
 
 	/**
-	 * if!=0 update anchor ranks when determining rank for pseudo-sorting
+	 * Update anchor ranks when determining rank for pseudo-sorting
 	 */
-	private final static int UPDATE_ANCHOR_RANKS = 0;
+	private final static boolean UPDATE_ANCHOR_RANKS = false;
 
 	/**
 	 * blind sort is used for groups of size &le; Text_size/Blind_sort_ratio
@@ -997,7 +997,8 @@ public class DeepShallow implements ISuffixArrayBuilder {
 	/**
      * 
      */
-	private void pseudoOrDeepSort(int a, int n, int depth) {
+	@SuppressWarnings("unused")
+    private void pseudoOrDeepSort(int a, int n, int depth) {
 		int offset, text_pos, sb, pseudo_anchor_pos, max_offset, size;
 
 		// ------- search for a useful pseudo-anchor -------------
@@ -1684,11 +1685,12 @@ public class DeepShallow implements ISuffixArrayBuilder {
 	/**
      * 
      */
-	private void pseudoAnchorSort(int a, int n, int pseudo_anchor_pos, int offset) {
+	@SuppressWarnings("unused")
+    private void pseudoAnchorSort(int a, int n, int pseudo_anchor_pos, int offset) {
 		int pseudo_anchor_rank;
 
 		// ---------- compute rank ------------
-		if (UPDATE_ANCHOR_RANKS != 0 && anchorDist > 0)
+		if (UPDATE_ANCHOR_RANKS && anchorDist > 0)
 			pseudo_anchor_rank = getRankUpdateAnchors(pseudo_anchor_pos);
 		else
 			pseudo_anchor_rank = getRank(pseudo_anchor_pos);
