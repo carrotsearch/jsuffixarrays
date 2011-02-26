@@ -1,15 +1,14 @@
 package org.jsuffixarrays;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 
 /**
  * Tests for {@link DivSufSort}.
  */
 public class BPRTest extends SuffixArrayBuilderTestBase
 {
-
-    @Before
+    @BeforeSuite
     public void setupForConstraints()
     {
         smallAlphabet = new MinMax(1, 10);
@@ -25,8 +24,8 @@ public class BPRTest extends SuffixArrayBuilderTestBase
         return new BPR();
     }
 
-    @Ignore
     @Override
+    @Test(enabled = false)
     public void invariantsOnRandomLargeAlphabet()
     {
         // TODO: I believe the long running times of BPR are due to excessive

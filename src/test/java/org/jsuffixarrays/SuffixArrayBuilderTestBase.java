@@ -3,7 +3,9 @@ package org.jsuffixarrays;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.*;
+import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import com.google.common.primitives.Ints;
 
@@ -18,7 +20,7 @@ public abstract class SuffixArrayBuilderTestBase
     protected MinMax smallAlphabet = new MinMax(-5, 5);
     protected MinMax largeAlphabet = new MinMax(-500, 500);
 
-    @Before
+    @BeforeTest
     public final void prepareBuilder()
     {
         builder = getInstance();
@@ -33,7 +35,7 @@ public abstract class SuffixArrayBuilderTestBase
     /**
      * Check the suffixes of <code>banana</code>.
      */
-    @Test
+    @Test(timeOut = 10000)
     public void checkBanana()
     {
         assertSuffixes("banana", "a", "ana", "anana", "banana", "na", "nana");
@@ -42,7 +44,7 @@ public abstract class SuffixArrayBuilderTestBase
     /**
      * Check the suffixes of <code>mississippi</code>.
      */
-    @Test
+    @Test(timeOut = 10000)
     public void checkMississippi()
     {
         assertSuffixes("mississippi", "i", "ippi", "issippi", "ississippi",
@@ -56,7 +58,7 @@ public abstract class SuffixArrayBuilderTestBase
      * <p>
      * Checks the LCP array created for the given input as well.
      */
-    @Test
+    @Test(timeOut = 10000)
     public void sameResultWithArraySlice()
     {
         final ISuffixArrayBuilder builder = getInstance();
@@ -81,17 +83,17 @@ public abstract class SuffixArrayBuilderTestBase
             int [] clone = input.clone();
             int [] sa = builder.buildSuffixArray(input, i, slice.length);
             int [] lcp = SuffixArrays.computeLCP(input, i, slice.length, sa);
-            Assert.assertArrayEquals(clone, input);
+            Assert.assertEquals(clone, input);
             if (prevSuffixArray != null)
             {
-                Assert.assertArrayEquals(prevSuffixArray, sa);
+                Assert.assertEquals(prevSuffixArray, sa);
             }
             prevSuffixArray = sa;
 
             // Compare LCPs
             if (prevLCP != null)
             {
-                Assert.assertArrayEquals(prevLCP, lcp);
+                Assert.assertEquals(prevLCP, lcp);
             }
             prevLCP = lcp;
         }
@@ -102,7 +104,7 @@ public abstract class SuffixArrayBuilderTestBase
      * (every suffix array is a permutation of indices, every suffix in the suffix array
      * is lexicographically greater or equal than all its predecessors).
      */
-    @Test
+    @Test(timeOut = 10000)
     public void invariantsOnRandomSmallAlphabet()
     {
         final ISuffixArrayBuilder builder = getInstance();
@@ -118,7 +120,7 @@ public abstract class SuffixArrayBuilderTestBase
     /**
      * @see #invariantsOnRandomSmallAlphabet()
      */
-    @Test
+    @Test(timeOut = 10000)
     public void invariantsOnRandomLargeAlphabet()
     {
         final ISuffixArrayBuilder builder = getInstance();
@@ -145,7 +147,7 @@ public abstract class SuffixArrayBuilderTestBase
 
             final int start = 0;
             final int [] SA = builder.buildSuffixArray(input, start, inputSize);
-            Assert.assertArrayEquals(input, copy);
+            Assert.assertEquals(input, copy);
             assertPermutation(SA, inputSize);
             assertSorted(SA, input, inputSize);
         }

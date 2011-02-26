@@ -1,13 +1,13 @@
 package org.jsuffixarrays;
 
-import org.junit.Before;
+import org.testng.annotations.BeforeSuite;
 
 /**
  * Tests for {@link QSufSort}.
  */
 public class QSufSortTest extends SuffixArrayBuilderTestBase
 {
-    @Before
+    @BeforeSuite
     public void setupForConstraints()
     {
         smallAlphabet = new MinMax(1, 10);
@@ -22,5 +22,4 @@ public class QSufSortTest extends SuffixArrayBuilderTestBase
     {
         return new QSufSort(true);
     }
-
 }

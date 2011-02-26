@@ -1,7 +1,5 @@
 package org.jsuffixarrays;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -9,16 +7,17 @@ import java.io.Writer;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.Assert;
+import static org.testng.Assert.*;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 
 /**
  * Tests for {@link Skew}.
  */
 public class SkewTest extends SuffixArrayBuilderTestBase
 {
-    @Before
+    @BeforeSuite
     public void setupForConstraints()
     {
         smallAlphabet = new MinMax(1, 10);

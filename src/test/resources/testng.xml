@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="jsuffixarrays" parallel="methods" thread-count="8">
+  <listeners>
+    <listener class-name="org.jsuffixarrays.TextTestReporter"></listener>
+  </listeners>
+  <test name="all">
+    <packages>
+      <package name="org.jsuffixarrays.*" />
+    </packages>
+  </test>
+</suite>

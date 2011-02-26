@@ -1,13 +1,13 @@
 package org.jsuffixarrays;
 
-import org.junit.Before;
+import org.testng.annotations.BeforeSuite;
 
 /**
  * Tests for {@link NaiveSort}.
  */
 public class NaiveSortTest extends SuffixArrayBuilderTestBase
 {
-    @Before
+    @BeforeSuite
     public void setupForConstraints() 
     {
         smallAlphabet = new MinMax(1, 10);

@@ -1,13 +1,13 @@
 package org.jsuffixarrays;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 
 /**
  * Tests for {@link SAIS}.
  */
 public class SAISTest extends SuffixArrayBuilderTestBase {
-    @Before
+    @BeforeSuite
     public void setupForConstraints() {
         smallAlphabet = new MinMax(1, 10);
         largeAlphabet = new MinMax(1, 1000);
@@ -25,7 +25,7 @@ public class SAISTest extends SuffixArrayBuilderTestBase {
      * 
      */
     @Override
-    @Ignore
+    @Test(enabled = false)
     public void sameResultWithArraySlice() {
         // Ignore this test, requires start == 0
     }

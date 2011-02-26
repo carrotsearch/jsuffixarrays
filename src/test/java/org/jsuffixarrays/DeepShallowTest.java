@@ -1,13 +1,14 @@
 package org.jsuffixarrays;
 
-import org.junit.Before;
+import org.testng.annotations.BeforeSuite;
+
 
 /**
  * Tests for {@link DivSufSort}.
  */
 public class DeepShallowTest extends SuffixArrayBuilderTestBase
 {
-    @Before
+    @BeforeSuite
     public void setupForConstraints()
     {
         smallAlphabet = new MinMax(1, 10);
@@ -21,6 +22,5 @@ public class DeepShallowTest extends SuffixArrayBuilderTestBase
     protected ISuffixArrayBuilder getInstance()
     {
         return new DeepShallow();
-
     }
 }
