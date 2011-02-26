@@ -265,7 +265,7 @@
       <id>release</id>
 
       <build>
-        <defaultGoal>install</defaultGoal>
+        <defaultGoal>package</defaultGoal>
 
         <plugins>
           <!-- Attach and modify JavaDocs. -->
@@ -316,6 +316,7 @@
               </descriptors>
               <attach>false</attach>
               <appendAssemblyId>false</appendAssemblyId>
+              <tarLongFileMode>gnu</tarLongFileMode>
             </configuration>
             <executions>
               <execution>
@@ -371,6 +372,7 @@
               <finalName>release-bundle</finalName>
               <attach>false</attach>
               <appendAssemblyId>false</appendAssemblyId>
+              <tarLongFileMode>gnu</tarLongFileMode>
             </configuration>
             <executions>
               <execution>

@@ -1,12 +1,9 @@
 
-About
------
+About JSuffixArrays
+-------------------
 
 This project provides the implementation of a number of algorithms for computing
 Suffix Arrays over sequences of symbols of arbitrary size (not only strings).
-
-Rationale
----------
 
 Suffix arrays are an extremely powerful data structure, useful in many areas of
 computer science. The theoretical bounds for computing suffix arrays is, just as with
@@ -17,3 +14,20 @@ This project was started because not many suffix arrays algorithms have been por
 from the C (pointers, pointers) world and out of shear curiosity to see which algorithm
 will perform best.
 
+
+Development
+-----------
+
+mvn clean                # Clean the working copy.
+mvn install -DskipTests  # Quick compile, no tests.
+mvn -Prelease            # Release mode (javadocs, sources, zip/tgz bundles).
+                         # Results in: target/*.tgz
+mvn -Prelease,sonatype   # Release mode, sign and prepare upload release bundle.
+                         # Results in: target/release-bundle.jar
+
+
+Release
+-------
+
+mvn clean deploy         Snapshot deploy to sonatype [requires proper setup in settings.xml]
+mvn -Prelease,sonatype clean verify Prepare release bundle for manual staging. 
