@@ -94,8 +94,6 @@ public abstract class SuffixArrayBuilderTestBase
                 Assert.assertArrayEquals(prevLCP, lcp);
             }
             prevLCP = lcp;
-            
-            System.out.println(i);
         }
     }
 

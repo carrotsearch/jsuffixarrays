@@ -366,6 +366,7 @@ public final class DivSufSort implements ISuffixArrayBuilder
                     }
                 }
             }
+
             // Compute ranks of type B* substrings.
             for (i = m - 1; 0 <= i; --i)
             {
