@@ -90,8 +90,10 @@ public class QSufSort implements ISuffixArrayBuilder
             V = input;
         }
         suffixsort(length, minmax.max + 1, minmax.min);
-        return I;
 
+        final int [] tmp = I;
+        V = I = null;
+        return tmp;
     }
 
     /**
@@ -220,7 +222,6 @@ public class QSufSort implements ISuffixArrayBuilder
         if (s > 0) sort_split(p, s);
         update_group(p + s, p + n - t - 1);
         if (t > 0) sort_split(p + n - t, t);
-
     }
 
     /**
