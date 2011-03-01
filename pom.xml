@@ -346,20 +346,7 @@
               </execution>
             </executions>
           </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!--
-      Sonatype manual release mode. Prepare bundle ZIPs, sign everything
-      once completed and prepare the release bundle JAR.
-    -->
-    <profile>
-      <id>sonatype</id>
-      <build>
-        <defaultGoal>verify</defaultGoal>
-
-        <plugins>
+	  
           <!-- GPG sign artefacts. -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
