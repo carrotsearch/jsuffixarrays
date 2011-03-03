@@ -359,6 +359,7 @@ public final class DivSufSort implements ISuffixArrayBuilder
             {
                 for (c1 = ALPHABET_SIZE - 1; c0 < c1; j = i, --c1)
                 {
+                    System.err.println("C0: " + c0 + " C1: " + c1);
                     i = bucket_B[(c0) * ALPHABET_SIZE + (c1)];
                     if (1 < (j - i))
                     {
