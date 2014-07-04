@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import java.util.Comparator;
 
 /*
  * TODO: ultimately, this class should be "intelligent" enough to pick the best
@@ -100,6 +101,23 @@ public final class SuffixArrays
     {
         final int [] sa = builder.buildSuffixArray(input, start, length);
         final int [] lcp = computeLCP(input, start, length, sa);
+        return new SuffixData(sa, lcp);
+    }
+
+    public static <T extends Comparable> SuffixData createWithLCP(T[] input, ISuffixArrayBuilder builder) {
+        return createWithLCP(input, builder, null);
+    }
+
+    /**
+     * Create a suffix array and an LCP array for a given generic array and a
+     * custom suffix array building strategy, using the given T object
+     * comparator.
+     */
+    public static <T> SuffixData createWithLCP(T[] input,
+            ISuffixArrayBuilder builder, Comparator<? super T> comparator) {
+        final GenericArrayAdapter adapter = new GenericArrayAdapter(builder, comparator);
+        final int[] sa = adapter.buildSuffixArray(input);
+        final int[] lcp = computeLCP(adapter.input, 0, input.length, sa);
         return new SuffixData(sa, lcp);
     }
 
