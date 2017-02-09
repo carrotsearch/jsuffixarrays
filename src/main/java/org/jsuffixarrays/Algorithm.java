@@ -93,7 +93,7 @@ public enum Algorithm
     }
 
     /**
-     * If it is possbile, create memory conserving instance of an algorithm, <b>this
+     * If it is possible, create memory conserving instance of an algorithm, <b>this
      * instance will overwrite input.</b>
      * <p>
      * If not, create default instance

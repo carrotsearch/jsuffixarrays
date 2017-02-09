@@ -453,7 +453,7 @@ public class DeepShallow implements ISuffixArrayBuilder {
 
 	/**
 	 * Function to compare two strings originating from the *b1 and *b2 The size of the unrolled loop must be at most
-	 * equal to the costant CMP_OVERSHOOT defined in common.h When the function is called cmpLeft must contain the
+	 * equal to the constant CMP_OVERSHOOT defined in common.h When the function is called cmpLeft must contain the
 	 * maximum number of comparisons the algorithm can do before returning 0 (equal strings) At exit cmpLeft has been
 	 * decreased by the # of comparisons done
 	 */
@@ -884,7 +884,7 @@ public class DeepShallow implements ISuffixArrayBuilder {
 	 * with anchor_pos and anchor_rank respectively) but it is not necessarily an anchor (=does not necessarily starts
 	 * at position multiple of anchorDist) since this function is called by pseudo_anchor_sort(). The routine works by
 	 * scanning the suffixes before and after the anchor in order to find (and mark) those which are suffixes of a[0]
-	 * ... a[n-1]. After that, the ordering of a[0] ... a[n-1] is derived with a sigle scan of the marked
+	 * ... a[n-1]. After that, the ordering of a[0] ... a[n-1] is derived with a single scan of the marked
 	 * suffixes.*******************************************************************
 	 */
 	private void generalAnchorSort(int a, int n, int anchor_pos, int anchor_rank, int offset) {
@@ -1162,8 +1162,8 @@ public class DeepShallow implements ISuffixArrayBuilder {
 
 	/**
 	 * Function to compare two strings originating from the *b1 and *b2 The size of the unrolled loop must be at most
-	 * equal to the costant CMP_OVERSHOOT defined in common.h the function return the result of the comparison (+ or -)
-	 * and writes in cmpDone the number of successfull comparisons done
+	 * equal to the constant CMP_OVERSHOOT defined in common.h the function return the result of the comparison (+ or -)
+	 * and writes in cmpDone the number of successful comparisons done
 	 */
 	private int cmpUnrolledLcp(int b1, int b2) {
 
@@ -1458,7 +1458,7 @@ public class DeepShallow implements ISuffixArrayBuilder {
 	/**
 	 * this function returns the lcp between suf1 and suf2 (that is returns n such that suf1[n]!=suf2[n] but
 	 * suf1[i]==suf2[i] for i=0..n-1 However, it is possible that suf1 is a prefix of suf2 (not vice-versa because of
-	 * the initial sorting of suffixes in order of descreasing length) in this case the function returns
+	 * the initial sorting of suffixes in order of decreasing length) in this case the function returns
 	 * n=length(suf1)-1. So in this case suf1[n]==suf2[n] (and suf1[n+1] does not exists).
 	 */
 	private int compareSuffixes(int suf1, int suf2, int depth) {
